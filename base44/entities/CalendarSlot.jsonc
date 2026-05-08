@@ -1,0 +1,60 @@
+{
+  "name": "CalendarSlot",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Titel des Slots"
+    },
+    "start_datetime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Startzeit"
+    },
+    "end_datetime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Endzeit"
+    },
+    "location": {
+      "type": "string",
+      "description": "Ort / Online-Link"
+    },
+    "room_id": {
+      "type": "string",
+      "description": "ID des gebuchten Raums"
+    },
+    "max_bookings": {
+      "type": "number",
+      "description": "Max. Buchungen",
+      "default": 1
+    },
+    "booked_by_email": {
+      "type": "string",
+      "description": "Gebucht von (K\u00fcnstler E-Mail)"
+    },
+    "booked_by_name": {
+      "type": "string",
+      "description": "Gebucht von (Name)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "frei",
+        "gebucht",
+        "gesperrt"
+      ],
+      "default": "frei",
+      "description": "Status des Slots"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Interne Notiz"
+    }
+  },
+  "required": [
+    "title",
+    "start_datetime",
+    "end_datetime"
+  ]
+}

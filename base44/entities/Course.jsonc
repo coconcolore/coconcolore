@@ -1,0 +1,87 @@
+{
+  "name": "Course",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "malerei",
+        "zeichnung",
+        "fotografie",
+        "skulptur",
+        "digitale_kunst",
+        "musik",
+        "tanz",
+        "sonstiges"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "entwurf",
+        "ausstehend_freigabe",
+        "freigegeben_intern",
+        "veroeffentlicht",
+        "abgelehnt",
+        "archiviert"
+      ],
+      "default": "entwurf"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "anfaenger",
+        "fortgeschritten",
+        "profi"
+      ],
+      "default": "anfaenger"
+    },
+    "duration_hours": {
+      "type": "number"
+    },
+    "artist_email": {
+      "type": "string",
+      "description": "E-Mail des K\u00fcnstlers"
+    },
+    "artist_name": {
+      "type": "string",
+      "description": "Anzeigename des K\u00fcnstlers"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Datum & Uhrzeit der Veranstaltung"
+    },
+    "location": {
+      "type": "string",
+      "description": "Ort / Online-Link"
+    },
+    "min_participants": {
+      "type": "number",
+      "description": "Mindest-Teilnehmerzahl"
+    },
+    "max_participants": {
+      "type": "number"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notizen vom Admin (z.B. Ablehnungsgrund)"
+    }
+  },
+  "required": [
+    "title",
+    "price"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Room",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Raumname (z.B. Raum A)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Beschreibung des Raums"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Maximale Personenanzahl"
+    },
+    "size_sqm": {
+      "type": "number",
+      "description": "Gr\u00f6\u00dfe in m\u00b2"
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ausstattung (z.B. Staffelei, Beamer, Waschbecken)"
+    },
+    "image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Bilder des Raums (URLs)"
+    },
+    "is_bookable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Kann gebucht werden?"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Interne Notizen"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

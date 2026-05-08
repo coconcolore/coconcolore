@@ -1,0 +1,37 @@
+{
+  "name": "PlatformSettings",
+  "type": "object",
+  "properties": {
+    "commission_percent": {
+      "type": "number",
+      "description": "Provision in % (z.B. 15)",
+      "default": 15
+    },
+    "platform_name": {
+      "type": "string",
+      "default": "KursStudio"
+    },
+    "platform_email": {
+      "type": "string"
+    },
+    "stripe_publishable_key": {
+      "type": "string"
+    },
+    "welcome_message": {
+      "type": "string"
+    },
+    "legal_impressum": {
+      "type": "string",
+      "description": "Impressum Text"
+    },
+    "legal_agb": {
+      "type": "string",
+      "description": "AGB Text"
+    },
+    "legal_datenschutz": {
+      "type": "string",
+      "description": "Datenschutzerkl\u00e4rung Text"
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,17 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "kuenstler_manager",
+        "kuenstler",
+        "location_manager",
+        "user"
+      ],
+      "default": "user"
+    }
+  }
+}

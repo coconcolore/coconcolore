@@ -1,0 +1,36 @@
+{
+  "name": "PayoutRequest",
+  "type": "object",
+  "properties": {
+    "artist_email": {
+      "type": "string"
+    },
+    "artist_name": {
+      "type": "string"
+    },
+    "iban": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Auszahlungsbetrag"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "beantragt",
+        "verarbeitet",
+        "abgelehnt"
+      ],
+      "default": "beantragt"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "artist_email",
+    "iban",
+    "amount"
+  ]
+}

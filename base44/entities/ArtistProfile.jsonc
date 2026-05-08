@@ -1,0 +1,95 @@
+{
+  "name": "ArtistProfile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "E-Mail des K\u00fcnstlers (verkn\u00fcpft mit User)"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Anzeigename / K\u00fcnstlername"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Biographie"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profilbild URL"
+    },
+    "website": {
+      "type": "string",
+      "description": "Website"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "Instagram Handle"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Spezialisierungen"
+    },
+    "invoice_name": {
+      "type": "string",
+      "description": "Name f\u00fcr Rechnungen (Firma/Person)"
+    },
+    "invoice_street": {
+      "type": "string",
+      "description": "Stra\u00dfe und Hausnummer"
+    },
+    "invoice_zip": {
+      "type": "string",
+      "description": "Postleitzahl"
+    },
+    "invoice_city": {
+      "type": "string",
+      "description": "Stadt"
+    },
+    "invoice_country": {
+      "type": "string",
+      "description": "Land",
+      "default": "Deutschland"
+    },
+    "invoice_address": {
+      "type": "string",
+      "description": "Rechnungsadresse (legacy)"
+    },
+    "invoice_tax_id": {
+      "type": "string",
+      "description": "Steuernummer / USt-IdNr."
+    },
+    "invoice_bank_info": {
+      "type": "string",
+      "description": "Bankverbindung (IBAN etc.)"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefonnummer"
+    },
+    "iban": {
+      "type": "string",
+      "description": "IBAN f\u00fcr Auszahlungen"
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "description": "Stripe Connect Account ID"
+    },
+    "stripe_onboarding_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vom Admin freigeschaltet"
+    }
+  },
+  "required": [
+    "user_email",
+    "display_name"
+  ]
+}

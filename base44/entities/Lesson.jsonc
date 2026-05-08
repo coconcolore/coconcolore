@@ -1,0 +1,35 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "description": "ID des zugeh\u00f6rigen Kurses"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titel der Lektion"
+    },
+    "content": {
+      "type": "string",
+      "description": "Inhalt der Lektion (HTML/Text)"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "Video URL"
+    },
+    "order": {
+      "type": "number",
+      "description": "Reihenfolge der Lektion"
+    },
+    "is_free_preview": {
+      "type": "boolean",
+      "default": false,
+      "description": "Kostenlose Vorschau?"
+    }
+  },
+  "required": [
+    "course_id",
+    "title"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "Enrollment",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "description": "ID des Kurses"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "E-Mail des Teilnehmers"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "ausstehend",
+        "bezahlt",
+        "erstattet"
+      ],
+      "default": "ausstehend",
+      "description": "Zahlungsstatus"
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "Bezahlter Betrag"
+    }
+  },
+  "required": [
+    "course_id",
+    "user_email"
+  ]
+}
