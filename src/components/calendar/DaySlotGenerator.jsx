@@ -10,7 +10,8 @@ import { Loader2, Zap, DoorOpen } from 'lucide-react';
 import RoomDialog from '@/components/rooms/RoomDialog';
 import { toast } from 'sonner';
 import { format, addMinutes } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 export default function DaySlotGenerator({ date, onClose, onSave }) {
   const [startTime, setStartTime] = useState('08:00');
@@ -20,6 +21,8 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
   const [roomId, setRoomId] = useState('');
   const [creating, setCreating] = useState(false);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('de') ? de : enUS;
 
   const { data: rooms = [] } = useQuery({
     queryKey: ['rooms'],
@@ -31,8 +34,6 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
 
   const generateSlots = () => {
     const slots = [];
-    const [sh, sm] = startTime.split(':').map(Number);
-    const [eh, em] = endTime.split(':').map(Number);
     let current = new Date(`${dateStr}T${startTime}:00`);
     const end = new Date(`${dateStr}T${endTime}:00`);
 
@@ -52,12 +53,12 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
 
   const handleCreate = async () => {
     if (preview.length === 0) {
-      toast.error('Keine Slots generierbar mit diesen Einstellungen.');
+      toast.error(t('dayGenerator.errorNoSlots'));
       return;
     }
     setCreating(true);
     const slotData = preview.map(s => ({
-      title: `Atelierzeit ${format(s.start, 'HH:mm')}`,
+      title: t('dayGenerator.studioTime', { time: format(s.start, 'HH:mm') }),
       start_datetime: s.start.toISOString(),
       end_datetime: s.end.toISOString(),
       location: location || undefined,
@@ -66,7 +67,7 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
       status: 'frei',
     }));
     await api.entities.CalendarSlot.bulkCreate(slotData);
-    toast.success(`${slotData.length} Slots für ${format(date, 'dd.MM.yyyy', { locale: de })} erstellt!`);
+    toast.success(t('dayGenerator.success', { count: slotData.length, date: format(date, 'dd.MM.yyyy', { locale: dateLocale }) }));
     setCreating(false);
     onSave();
   };
@@ -77,35 +78,35 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
         <DialogHeader>
           <DialogTitle className="font-display flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            Tag freigeben — {format(date, 'EEE, dd.MM.yyyy', { locale: de })}
+            {t('dayGenerator.title')} — {format(date, 'EEE, dd.MM.yyyy', { locale: dateLocale })}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Von</Label>
+              <Label>{t('dayGenerator.from')}</Label>
               <Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Bis</Label>
+              <Label>{t('dayGenerator.to')}</Label>
               <Input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Intervall (Minuten)</Label>
+            <Label>{t('dayGenerator.interval')}</Label>
             <select
               value={intervalMin}
               onChange={e => setIntervalMin(Number(e.target.value))}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
             >
-              <option value={30}>30 Minuten</option>
-              <option value={60}>60 Minuten</option>
-              <option value={90}>90 Minuten</option>
-              <option value={120}>2 Stunden</option>
+              <option value={30}>30 min</option>
+              <option value={60}>60 min</option>
+              <option value={90}>90 min</option>
+              <option value={120}>120 min</option>
             </select>
           </div>
           <div className="space-y-2">
-            <Label>Raum</Label>
+            <Label>{t('dayGenerator.room')}</Label>
             {rooms.length === 0 ? (
               <button
                 type="button"
@@ -114,16 +115,16 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
               >
                 <DoorOpen className="w-5 h-5 text-amber-600 shrink-0" />
                 <div className="flex-1 text-sm text-amber-800">
-                  Noch keine Räume angelegt. <span className="underline font-medium">Jetzt Raum erstellen →</span>
+                  {t('dayGenerator.noRooms')} <span className="underline font-medium">{t('dayGenerator.createRoom')}</span>
                 </div>
               </button>
             ) : (
               <Select value={roomId || 'none'} onValueChange={v => setRoomId(v === 'none' ? '' : v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Kein Raum" />
+                  <SelectValue placeholder={t('dayGenerator.noRoom')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Kein Raum —</SelectItem>
+                  <SelectItem value="none">{t('dayGenerator.noRoom')}</SelectItem>
                   {bookableRooms.map(r => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.name}{r.capacity ? ` (${r.capacity} Pers.)` : ''}
@@ -142,7 +143,7 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
 
           {preview.length > 0 && (
             <div className="p-3 bg-primary/5 rounded-xl border border-primary/20">
-              <p className="text-sm font-medium text-primary mb-2">{preview.length} Slots werden erstellt:</p>
+              <p className="text-sm font-medium text-primary mb-2">{t('dayGenerator.preview', { count: preview.length })}</p>
               <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto">
                 {preview.map((s, i) => (
                   <span key={i} className="text-xs bg-white border border-border rounded px-1.5 py-0.5">
@@ -154,10 +155,10 @@ export default function DaySlotGenerator({ date, onClose, onSave }) {
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>Abbrechen</Button>
+            <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
             <Button className="bg-primary hover:bg-primary/90" onClick={handleCreate} disabled={creating || preview.length === 0}>
               {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {preview.length} Slots erstellen
+              {t('dayGenerator.create', { count: preview.length })}
             </Button>
           </div>
         </div>

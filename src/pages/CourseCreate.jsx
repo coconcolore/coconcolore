@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
@@ -13,16 +13,17 @@ import { ArrowLeft, Upload, Loader2, Calendar, Clock, MapPin, ShieldCheck, X, Bo
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enUS } from 'date-fns/locale';
 import { useAuth } from '@/lib/AuthContext';
-
-// ── Artist flow: pick approved proposal + free slot ──────────────────────────
+import { useTranslation } from 'react-i18next';
 
 function ArtistCourseCreate({ user }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('de') ? de : enUS;
 
   const { data: allProposals = [], isLoading: loadingProposals } = useQuery({
     queryKey: ['my-approved-proposals', user?.email],
@@ -36,6 +37,15 @@ function ArtistCourseCreate({ user }) {
     queryKey: ['calendar-slots-free'],
     queryFn: () => api.entities.CalendarSlot.list('start_datetime', 500),
   });
+
+  React.useEffect(() => {
+    if (allSlots.length > 0) {
+      console.log('Available slots loaded:', allSlots.length, {
+        firstSlot: allSlots[0],
+        hasId: !!allSlots[0]?.id,
+      });
+    }
+  }, [allSlots]);
 
   const now = new Date();
   const freeSlots = allSlots.filter(
@@ -56,6 +66,7 @@ function ArtistCourseCreate({ user }) {
         status: 'entwurf',
         event_date: selectedSlot.start_datetime,
         location: selectedSlot.location || '',
+        room_id: selectedSlot.room_id || null,
       });
       await api.entities.CalendarSlot.update(selectedSlot.id, {
         status: 'gebucht',
@@ -69,13 +80,13 @@ function ArtistCourseCreate({ user }) {
       queryClient.invalidateQueries({ queryKey: ['calendar-slots'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-slots-free'] });
       queryClient.invalidateQueries({ queryKey: ['my-approved-proposals'] });
-      toast.success('Kurstermin erfolgreich angelegt.');
+      toast.success(t('courseCreate.successCreate'));
       navigate(`/courses/${result.id}`);
     },
-    onError: () => toast.error('Fehler beim Anlegen. Bitte versuche es erneut.'),
+    onError: () => toast.error(t('courseCreate.errorCreate')),
   });
 
-  const canSubmit = selectedProposal && selectedSlot;
+  const canSubmit = !!selectedProposal && !!selectedSlot;
 
   if (loadingProposals) {
     return (
@@ -92,21 +103,20 @@ function ArtistCourseCreate({ user }) {
           <Link to="/courses">
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
-          <h1 className="font-display text-3xl font-bold">Kurstermin planen</h1>
+          <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleArtist')}</h1>
         </div>
         <Card className="p-8 text-center space-y-4">
           <Lightbulb className="w-10 h-10 text-amber-400 mx-auto" />
-          <h2 className="font-semibold text-lg">Noch kein freigegebener Kurs</h2>
+          <h2 className="font-semibold text-lg">{t('courseCreate.noProposal')}</h2>
           <p className="text-muted-foreground text-sm">
-            Du kannst erst einen Termin buchen, sobald mindestens ein Kursvorschlag intern freigegeben wurde.
-            Schlage zuerst einen Kurs im Bereich <strong>Profil → Kurs vorschlagen</strong> vor.
+            {t('courseCreate.noProposalDesc').replace('<1>', '').replace('</1>', '')}
           </p>
           <div className="flex justify-center gap-3 pt-2">
             <Link to="/profil">
-              <Button variant="outline">Zum Profil</Button>
+              <Button variant="outline">{t('courseCreate.toProfile')}</Button>
             </Link>
             <Link to="/courses">
-              <Button variant="ghost">Zurück zur Übersicht</Button>
+              <Button variant="ghost">{t('courseCreate.backToOverview')}</Button>
             </Link>
           </div>
         </Card>
@@ -121,19 +131,24 @@ function ArtistCourseCreate({ user }) {
           <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">Kurstermin planen</h1>
-          <p className="text-muted-foreground mt-1">Wähle einen genehmigten Kurs und einen freien Zeitslot.</p>
+          <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleArtist')}</h1>
+          <p className="text-muted-foreground mt-1">{t('courseCreate.subtitleArtist')}</p>
         </div>
       </div>
 
       <Card className="p-6 space-y-6">
 
-        {/* Step 1: Approved proposal */}
         <div className="space-y-3">
           <Label className="text-base font-semibold flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-primary" />
-            Schritt 1 – Freigegebenen Kurs wählen
+            {t('courseCreate.step1')}
           </Label>
+          {selectedProposal && (
+            <div className="p-3 bg-primary/5 border border-primary/30 rounded-xl flex items-center gap-2 text-sm text-primary font-medium">
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              {selectedProposal.title}
+            </div>
+          )}
           <div className="space-y-2">
             {allProposals.map((proposal) => (
               <button
@@ -157,10 +172,10 @@ function ArtistCourseCreate({ user }) {
                   <p className="font-medium text-sm truncate">{proposal.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {proposal.price?.toFixed(2)} €
-                    {proposal.max_participants ? ` · max. ${proposal.max_participants} TN` : ''}
+                    {proposal.max_participants ? ` · ${t('courseCreate.maxTN', { count: proposal.max_participants })}` : ''}
                   </p>
                 </div>
-                <Badge className="bg-blue-100 text-blue-700 shrink-0 text-xs">Freigegeben</Badge>
+                <Badge className="bg-blue-100 text-blue-700 shrink-0 text-xs">{t('courseCreate.approved')}</Badge>
               </button>
             ))}
           </div>
@@ -168,17 +183,22 @@ function ArtistCourseCreate({ user }) {
 
         <hr className="border-border" />
 
-        {/* Step 2: Time slot */}
         <div className="space-y-3">
           <Label className="text-base font-semibold flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            Schritt 2 – Zeitslot wählen
+            {t('courseCreate.step2')}
           </Label>
+          {selectedSlot && (
+            <div className="p-3 bg-primary/5 border border-primary/30 rounded-xl flex items-center gap-2 text-sm text-primary font-medium">
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              ✓ {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy HH:mm', { locale: dateLocale })}
+            </div>
+          )}
           {loadingSlots ? (
             <div className="h-12 bg-muted rounded-xl animate-pulse" />
           ) : freeSlots.length === 0 ? (
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-              Keine freien Slots verfügbar. Bitte wende dich an einen Manager, um Slots freizugeben.
+              {t('courseCreate.noFreeSlots')}
             </div>
           ) : (
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -194,64 +214,68 @@ function ArtistCourseCreate({ user }) {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm">{slot.title}</p>
-                    <Badge className="bg-primary/10 text-primary text-xs">Frei</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {format(parseISO(slot.start_datetime), 'EEE, dd.MM.yyyy HH:mm', { locale: de })} –{' '}
-                      {format(parseISO(slot.end_datetime), 'HH:mm')} Uhr
-                    </span>
-                    {slot.location && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />{slot.location}
-                      </span>
-                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{slot.title}</p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {format(parseISO(slot.start_datetime), 'EEE, dd.MM.yyyy HH:mm', { locale: dateLocale })} –{' '}
+                          {format(parseISO(slot.end_datetime), 'HH:mm')}
+                        </span>
+                        {slot.location && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />{slot.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <Badge className="bg-primary/10 text-primary text-xs shrink-0 ml-2">{t('courseCreate.free')}</Badge>
                   </div>
                 </button>
               ))}
             </div>
           )}
-          {selectedSlot && (
-            <p className="text-xs text-primary font-medium">
-              ✓ {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy HH:mm', { locale: de })} Uhr
-            </p>
-          )}
         </div>
 
-        {/* Summary */}
         {canSubmit && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 space-y-1">
-            <p className="font-medium">Zusammenfassung</p>
-            <p>Kurs: <strong>{selectedProposal.title}</strong></p>
+            <p className="font-medium">{t('courseCreate.summary')}</p>
+            <p>{t('courseCreate.summaryCourseLine')} <strong>{selectedProposal.title}</strong></p>
             <p>
-              Termin:{' '}
+              {t('courseCreate.summaryTimeLine')}{' '}
               <strong>
-                {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy, HH:mm', { locale: de })} –{' '}
-                {format(parseISO(selectedSlot.end_datetime), 'HH:mm')} Uhr
+                {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy, HH:mm', { locale: dateLocale })} –{' '}
+                {format(parseISO(selectedSlot.end_datetime), 'HH:mm')}
               </strong>
             </p>
+          </div>
+        )}
+
+        {!canSubmit && (selectedProposal || selectedSlot) && (
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 space-y-1">
+            {!selectedProposal && <p className="font-medium">{t('courseCreate.step1')} auswählen</p>}
+            {!selectedSlot && <p className="font-medium">{t('courseCreate.step2')} auswählen</p>}
           </div>
         )}
 
         <div className="flex justify-end gap-3 pt-2">
           <Link to="/courses">
             <Button type="button" variant="outline">
-              <X className="w-4 h-4 mr-2" />Abbrechen
+              <X className="w-4 h-4 mr-2" />{t('common.cancel')}
             </Button>
           </Link>
           <Button
             onClick={() => createMutation.mutate()}
             disabled={!canSubmit || createMutation.isPending}
             className="bg-primary hover:bg-primary/90"
+            type="button"
           >
             {createMutation.isPending ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
               <BookOpen className="w-4 h-4 mr-2" />
             )}
-            Kurstermin anlegen
+            {t('courseCreate.createDate')}
           </Button>
         </div>
       </Card>
@@ -259,13 +283,13 @@ function ArtistCourseCreate({ user }) {
   );
 }
 
-// ── Manager / Admin flow: full form (unchanged) ───────────────────────────────
-
 function ManagerCourseCreate({ user }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('de') ? de : enUS;
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -304,7 +328,7 @@ function ManagerCourseCreate({ user }) {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-slots'] });
       queryClient.invalidateQueries({ queryKey: ['calendar-slots-free'] });
-      toast.success('Kurs als Entwurf gespeichert.');
+      toast.success(t('courseCreate.draftSaved'));
       navigate(`/courses/${result.id}`);
     },
   });
@@ -321,7 +345,7 @@ function ManagerCourseCreate({ user }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedSlot) {
-      toast.error('Bitte wähle einen freien Zeitslot aus dem Kalender.');
+      toast.error(t('courseCreate.errorNoSlot'));
       return;
     }
     createMutation.mutate({
@@ -334,6 +358,7 @@ function ManagerCourseCreate({ user }) {
       artist_name: user?.full_name || user?.email,
       event_date: selectedSlot.start_datetime,
       location: formData.location || selectedSlot.location || '',
+      room_id: selectedSlot.room_id || null,
     });
   };
 
@@ -346,8 +371,8 @@ function ManagerCourseCreate({ user }) {
           <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
         <div>
-          <h1 className="font-display text-3xl font-bold">Neuer Kurs</h1>
-          <p className="text-muted-foreground mt-1">Erstelle einen neuen Kurs</p>
+          <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleManager')}</h1>
+          <p className="text-muted-foreground mt-1">{t('courseCreate.subtitleManager')}</p>
         </div>
       </div>
 
@@ -357,11 +382,11 @@ function ManagerCourseCreate({ user }) {
           <div className="space-y-3">
             <Label className="text-base font-semibold flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              Zeitslot wählen *
+              {t('courseCreate.selectSlot')}
             </Label>
             {freeSlots.length === 0 ? (
               <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-                Keine freien Slots verfügbar.
+                {t('courseCreate.noSlotsManager')}
               </div>
             ) : (
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -378,13 +403,13 @@ function ManagerCourseCreate({ user }) {
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-sm">{slot.title}</p>
-                      <Badge className="bg-primary/10 text-primary text-xs">Frei</Badge>
+                      <Badge className="bg-primary/10 text-primary text-xs">{t('courseCreate.free')}</Badge>
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {format(parseISO(slot.start_datetime), 'EEE, dd.MM.yyyy HH:mm', { locale: de })} –{' '}
-                        {format(parseISO(slot.end_datetime), 'HH:mm')} Uhr
+                        {format(parseISO(slot.start_datetime), 'EEE, dd.MM.yyyy HH:mm', { locale: dateLocale })} –{' '}
+                        {format(parseISO(slot.end_datetime), 'HH:mm')}
                       </span>
                       {slot.location && (
                         <span className="flex items-center gap-1">
@@ -398,7 +423,7 @@ function ManagerCourseCreate({ user }) {
             )}
             {selectedSlot && (
               <p className="text-xs text-primary font-medium">
-                ✓ Ausgewählt: {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy HH:mm', { locale: de })} Uhr
+                {t('courseCreate.selectedSlotLabel')} {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy HH:mm', { locale: dateLocale })}
               </p>
             )}
           </div>
@@ -406,13 +431,13 @@ function ManagerCourseCreate({ user }) {
           <hr className="border-border" />
 
           <div>
-            <Label>Titelbild</Label>
+            <Label>{t('courseCreate.coverImage')}</Label>
             <div className="mt-2">
               {formData.image_url ? (
                 <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
                   <img src={formData.image_url} alt="" className="w-full h-full object-cover" />
                   <Button type="button" variant="secondary" size="sm" className="absolute bottom-3 right-3" onClick={() => update('image_url', '')}>
-                    Ändern
+                    {t('courseCreate.change')}
                   </Button>
                 </div>
               ) : (
@@ -423,7 +448,7 @@ function ManagerCourseCreate({ user }) {
                   ) : (
                     <>
                       <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                      <span className="text-sm text-muted-foreground">Bild hochladen</span>
+                      <span className="text-sm text-muted-foreground">{t('courseCreate.uploadImage')}</span>
                     </>
                   )}
                 </label>
@@ -432,51 +457,51 @@ function ManagerCourseCreate({ user }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Titel *</Label>
+            <Label htmlFor="title">{t('courseCreate.titleLabel')}</Label>
             <Input id="title" value={formData.title} onChange={(e) => update('title', e.target.value)} placeholder="z.B. Aquarellmalerei für Anfänger" required />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Beschreibung</Label>
+            <Label htmlFor="description">{t('courseCreate.description')}</Label>
             <Textarea id="description" value={formData.description} onChange={(e) => update('description', e.target.value)} placeholder="Beschreibe deinen Kurs..." rows={4} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Preis (€) *</Label>
+              <Label htmlFor="price">{t('courseCreate.priceLabel')}</Label>
               <Input id="price" type="number" step="0.01" min="0" value={formData.price} onChange={(e) => update('price', e.target.value)} placeholder="49.99" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Dauer (Stunden)</Label>
+              <Label htmlFor="duration">{t('courseCreate.duration')}</Label>
               <Input id="duration" type="number" step="0.5" min="0" value={formData.duration_hours} onChange={(e) => update('duration_hours', e.target.value)} placeholder="z.B. 2" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Kategorie</Label>
+              <Label>{t('courseCreate.category')}</Label>
               <Select value={formData.category} onValueChange={(v) => update('category', v)}>
-                <SelectTrigger><SelectValue placeholder="Wählen..." /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('courseCreate.chooseCategory')} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="malerei">Malerei</SelectItem>
-                  <SelectItem value="zeichnung">Zeichnung</SelectItem>
-                  <SelectItem value="fotografie">Fotografie</SelectItem>
-                  <SelectItem value="skulptur">Skulptur</SelectItem>
-                  <SelectItem value="digitale_kunst">Digitale Kunst</SelectItem>
-                  <SelectItem value="musik">Musik</SelectItem>
-                  <SelectItem value="tanz">Tanz</SelectItem>
-                  <SelectItem value="sonstiges">Sonstiges</SelectItem>
+                  <SelectItem value="malerei">{t('courses.category.malerei')}</SelectItem>
+                  <SelectItem value="zeichnung">{t('courses.category.zeichnung')}</SelectItem>
+                  <SelectItem value="fotografie">{t('courses.category.fotografie')}</SelectItem>
+                  <SelectItem value="skulptur">{t('courses.category.skulptur')}</SelectItem>
+                  <SelectItem value="digitale_kunst">{t('courses.category.digitale_kunst')}</SelectItem>
+                  <SelectItem value="musik">{t('courses.category.musik')}</SelectItem>
+                  <SelectItem value="tanz">{t('courses.category.tanz')}</SelectItem>
+                  <SelectItem value="sonstiges">{t('courses.category.sonstiges')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Level</Label>
+              <Label>{t('courseCreate.level')}</Label>
               <Select value={formData.level} onValueChange={(v) => update('level', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="anfaenger">Anfänger</SelectItem>
-                  <SelectItem value="fortgeschritten">Fortgeschritten</SelectItem>
-                  <SelectItem value="profi">Profi</SelectItem>
+                  <SelectItem value="anfaenger">{t('courseCreate.levelAnfaenger')}</SelectItem>
+                  <SelectItem value="fortgeschritten">{t('courseCreate.levelFortgeschritten')}</SelectItem>
+                  <SelectItem value="profi">{t('courseCreate.levelProfi')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -484,26 +509,26 @@ function ManagerCourseCreate({ user }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="max_participants">Max. Teilnehmer</Label>
+              <Label htmlFor="max_participants">{t('courseCreate.maxParticipants')}</Label>
               <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={(e) => update('max_participants', e.target.value)} placeholder="z.B. 15" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Ort / Online-Link</Label>
+              <Label htmlFor="location">{t('courseCreate.location')}</Label>
               <Input id="location" value={formData.location} onChange={(e) => update('location', e.target.value)} placeholder={selectedSlot?.location || 'Atelier, Adresse oder Link'} />
             </div>
           </div>
 
           <div className="p-4 bg-accent rounded-xl border border-primary/20 text-sm text-accent-foreground">
-            ℹ️ Dein Kurs wird zuerst als <strong>Entwurf</strong> gespeichert.
+            ℹ️ {t('courseCreate.draftHint')}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
             <Link to="/courses">
-              <Button type="button" variant="outline"><X className="w-4 h-4 mr-2" />Abbrechen</Button>
+              <Button type="button" variant="outline"><X className="w-4 h-4 mr-2" />{t('common.cancel')}</Button>
             </Link>
             <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createMutation.isPending || !selectedSlot}>
               {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookOpen className="w-4 h-4 mr-2" />}
-              Kurs erstellen
+              {t('courseCreate.createCourse')}
             </Button>
           </div>
         </form>
@@ -512,10 +537,9 @@ function ManagerCourseCreate({ user }) {
   );
 }
 
-// ── Entry point ───────────────────────────────────────────────────────────────
-
 export default function CourseCreate() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'kuenstler_manager' || isAdmin;
@@ -525,8 +549,8 @@ export default function CourseCreate() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <ShieldCheck className="w-12 h-12 text-muted-foreground/40 mb-4" />
-        <h2 className="font-display text-2xl font-bold mb-2">Kein Zugriff</h2>
-        <p className="text-muted-foreground">Nur Künstler, Manager und Admins können Kurse erstellen.</p>
+        <h2 className="font-display text-2xl font-bold mb-2">{t('courseCreate.noAccess')}</h2>
+        <p className="text-muted-foreground">{t('courseCreate.noAccessDesc')}</p>
       </div>
     );
   }

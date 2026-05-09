@@ -7,11 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, Loader2, DoorOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import RoomDialog from '@/components/rooms/RoomDialog';
+import { useTranslation } from 'react-i18next';
 
 export default function LocationTab() {
   const queryClient = useQueryClient();
   const [editRoom, setEditRoom] = useState(null);
   const [showNew, setShowNew] = useState(false);
+  const { t } = useTranslation();
 
   const { data: rooms = [], isLoading } = useQuery({
     queryKey: ['rooms'],
@@ -22,7 +24,7 @@ export default function LocationTab() {
     mutationFn: (id) => api.entities.Room.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      toast.success('Raum gelöscht.');
+      toast.success(t('location.deleted'));
     },
   });
 
@@ -37,20 +39,20 @@ export default function LocationTab() {
       <Card className="p-6 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-lg">Räume des Ateliers</h3>
-            <p className="text-sm text-muted-foreground">Räume anlegen und Ausstattung definieren – sie sind dann in Kalender-Slots buchbar.</p>
+            <h3 className="font-semibold text-lg">{t('location.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('location.desc')}</p>
           </div>
           <Button className="bg-primary hover:bg-primary/90" onClick={() => setShowNew(true)}>
-            <Plus className="w-4 h-4 mr-2" />Raum anlegen
+            <Plus className="w-4 h-4 mr-2" />{t('location.addRoom')}
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center gap-2 text-muted-foreground py-4"><Loader2 className="w-4 h-4 animate-spin" />Lädt...</div>
+          <div className="flex items-center gap-2 text-muted-foreground py-4"><Loader2 className="w-4 h-4 animate-spin" />{t('location.loading')}</div>
         ) : rooms.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             <DoorOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">Noch keine Räume angelegt.</p>
+            <p className="text-sm">{t('location.noRooms')}</p>
           </div>
         ) : (
           <div className="space-y-3 mt-2">
@@ -59,9 +61,9 @@ export default function LocationTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold">{room.name}</p>
-                    {!room.is_bookable && <Badge variant="outline" className="text-xs text-muted-foreground">Nicht buchbar</Badge>}
-                    {room.capacity && <Badge variant="secondary" className="text-xs">{room.capacity} Personen</Badge>}
-                    {room.size_sqm && <Badge variant="secondary" className="text-xs">{room.size_sqm} m²</Badge>}
+                    {!room.is_bookable && <Badge variant="outline" className="text-xs text-muted-foreground">{t('location.notBookable')}</Badge>}
+                    {room.capacity && <Badge variant="secondary" className="text-xs">{t('location.persons', { count: room.capacity })}</Badge>}
+                    {room.size_sqm && <Badge variant="secondary" className="text-xs">{t('location.sqm', { count: room.size_sqm })}</Badge>}
                   </div>
                   {room.description && <p className="text-sm text-muted-foreground mt-1">{room.description}</p>}
                   {room.equipment?.length > 0 && (

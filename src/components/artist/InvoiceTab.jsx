@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
@@ -13,7 +14,7 @@ function useDebounce(value, delay) {
   return debounced;
 }
 
-function AddressAutocomplete({ value, onChange, onSelect }) {
+function AddressAutocomplete({ value, onChange, onSelect, label }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -63,7 +64,7 @@ function AddressAutocomplete({ value, onChange, onSelect }) {
 
   return (
     <div className="space-y-2" ref={ref}>
-      <Label>Straße & Hausnummer</Label>
+      <Label>{label}</Label>
       <div className="relative">
         <Input
           value={value}
@@ -100,6 +101,8 @@ function AddressAutocomplete({ value, onChange, onSelect }) {
 }
 
 export default function InvoiceTab({ profile, update }) {
+  const { t } = useTranslation();
+
   const handleAddressSelect = ({ street, zip, city, country }) => {
     update('invoice_street', street);
     update('invoice_zip', zip);
@@ -109,19 +112,19 @@ export default function InvoiceTab({ profile, update }) {
 
   return (
     <Card className="p-6 space-y-5">
-      <p className="text-sm text-muted-foreground">Diese Daten erscheinen auf deinen Rechnungen</p>
+      <p className="text-sm text-muted-foreground">{t('invoice.dataTitle')}</p>
 
       <div className="space-y-2">
-        <Label>Name / Firma *</Label>
+        <Label>{t('invoice.nameFirm')}</Label>
         <Input
           value={profile.invoice_name}
           onChange={e => update('invoice_name', e.target.value)}
-          placeholder="Max Mustermann oder Galerie XY GmbH"
+          placeholder={t('invoice.namePlaceholder')}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Telefonnummer *</Label>
+        <Label>{t('invoice.phone')}</Label>
         <Input
           type="tel"
           value={profile.phone}
@@ -132,6 +135,7 @@ export default function InvoiceTab({ profile, update }) {
       </div>
 
       <AddressAutocomplete
+        label={t('invoice.street')}
         value={profile.invoice_street}
         onChange={val => update('invoice_street', val)}
         onSelect={handleAddressSelect}
@@ -139,7 +143,7 @@ export default function InvoiceTab({ profile, update }) {
 
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2">
-          <Label>PLZ</Label>
+          <Label>{t('invoice.zip')}</Label>
           <Input
             value={profile.invoice_zip}
             onChange={e => update('invoice_zip', e.target.value)}
@@ -148,7 +152,7 @@ export default function InvoiceTab({ profile, update }) {
           />
         </div>
         <div className="col-span-2 space-y-2">
-          <Label>Stadt</Label>
+          <Label>{t('invoice.city')}</Label>
           <Input
             value={profile.invoice_city}
             onChange={e => update('invoice_city', e.target.value)}
@@ -158,7 +162,7 @@ export default function InvoiceTab({ profile, update }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Land</Label>
+        <Label>{t('invoice.country')}</Label>
         <Input
           value={profile.invoice_country}
           onChange={e => update('invoice_country', e.target.value)}
@@ -167,7 +171,7 @@ export default function InvoiceTab({ profile, update }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Steuernummer / USt-IdNr.</Label>
+        <Label>{t('invoice.taxId')}</Label>
         <Input
           value={profile.invoice_tax_id}
           onChange={e => update('invoice_tax_id', e.target.value)}
@@ -176,7 +180,7 @@ export default function InvoiceTab({ profile, update }) {
       </div>
 
       <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">
-        💡 Deine IBAN für Auszahlungen pflegst du im Tab <strong>Auszahlung</strong>.
+        💡 {t('invoice.ibanHint')}
       </div>
     </Card>
   );

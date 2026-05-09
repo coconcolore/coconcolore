@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { Card } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import InvoiceTab from '@/components/artist/InvoiceTab';
 import LocationTab from '@/components/artist/LocationTab';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function ArtistSetup() {
   const { user: authUser } = useAuth();
@@ -27,6 +28,7 @@ export default function ArtistSetup() {
     invoice_name: '', invoice_street: '', invoice_zip: '', invoice_city: '', invoice_country: 'Deutschland',
     invoice_tax_id: '', phone: '',
   });
+  const { t } = useTranslation();
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -71,10 +73,10 @@ export default function ArtistSetup() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-artist-profile'] });
-      toast.success('Profil gespeichert!');
+      toast.success(t('artist.savedSuccess'));
     },
     onError: () => {
-      toast.error('Fehler beim Speichern. Bitte versuche es erneut.');
+      toast.error(t('artist.saveError'));
     },
   });
 
@@ -85,9 +87,9 @@ export default function ArtistSetup() {
     try {
       const { file_url } = await api.integrations.Core.UploadFile({ file });
       setProfile(p => ({ ...p, avatar_url: file_url }));
-      toast.success('Foto hochgeladen!');
+      toast.success(t('artist.photoSuccess'));
     } catch {
-      toast.error('Fehler beim Hochladen des Fotos.');
+      toast.error(t('artist.photoError'));
     } finally {
       setUploading(false);
     }
@@ -96,16 +98,16 @@ export default function ArtistSetup() {
   const update = (field, value) => setProfile(p => ({ ...p, [field]: value }));
 
   const missingFields = [];
-  if (!profile.display_name?.trim()) missingFields.push('Künstlername');
-  if (!profile.phone?.trim()) missingFields.push('Telefonnummer');
-  if (!profile.invoice_street?.trim()) missingFields.push('Straße');
-  if (!profile.invoice_zip?.trim()) missingFields.push('PLZ');
-  if (!profile.invoice_city?.trim()) missingFields.push('Stadt');
+  if (!profile.display_name?.trim()) missingFields.push(t('artist.artistName').replace(' *', ''));
+  if (!profile.phone?.trim()) missingFields.push(t('invoice.phone').replace(' *', ''));
+  if (!profile.invoice_street?.trim()) missingFields.push(t('invoice.street'));
+  if (!profile.invoice_zip?.trim()) missingFields.push(t('invoice.zip'));
+  if (!profile.invoice_city?.trim()) missingFields.push(t('invoice.city'));
   const profileComplete = missingFields.length === 0;
 
   const handleSave = () => {
     if (!profileComplete) {
-      toast.error(`Bitte fülle folgende Pflichtfelder aus: ${missingFields.join(', ')}`);
+      toast.error(`${t('artist.missingRequired')} ${missingFields.join(', ')}`);
       return;
     }
     saveMutation.mutate(profile);
@@ -114,16 +116,16 @@ export default function ArtistSetup() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="font-display text-3xl font-bold">Mein Künstlerprofil</h1>
-        <p className="text-muted-foreground mt-1">Verwalte dein Profil und deine Rechnungsdaten</p>
+        <h1 className="font-display text-3xl font-bold">{t('artist.profileTitle')}</h1>
+        <p className="text-muted-foreground mt-1">{t('artist.profileSubtitle')}</p>
       </div>
 
       {!profileComplete && (
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-amber-800">Pflichtfelder fehlen für die Freischaltung</p>
-            <p className="text-sm text-amber-700 mt-0.5">Bitte ergänze: <strong>{missingFields.join(', ')}</strong></p>
+            <p className="font-medium text-amber-800">{t('artist.missingFields')}</p>
+            <p className="text-sm text-amber-700 mt-0.5">{t('artist.missingFieldsDesc')} <strong>{missingFields.join(', ')}</strong></p>
           </div>
         </div>
       )}
@@ -132,8 +134,8 @@ export default function ArtistSetup() {
         <div className="flex items-center gap-3 p-4 bg-accent rounded-xl border border-primary/20">
           <Loader2 className="w-5 h-5 text-primary animate-spin" />
           <div>
-            <p className="font-medium text-accent-foreground">Warte auf Admin-Freischaltung</p>
-            <p className="text-sm text-muted-foreground">Dein Profil wird vom Admin geprüft und freigeschaltet.</p>
+            <p className="font-medium text-accent-foreground">{t('artist.waitingApproval')}</p>
+            <p className="text-sm text-muted-foreground">{t('artist.waitingApprovalDesc')}</p>
           </div>
         </div>
       )}
@@ -141,23 +143,22 @@ export default function ArtistSetup() {
       {existingProfile?.is_approved && (
         <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
           <CheckCircle className="w-5 h-5 text-primary" />
-          <p className="font-medium">Dein Profil ist freigeschaltet</p>
+          <p className="font-medium">{t('artist.profileApproved')}</p>
         </div>
       )}
 
       <Tabs defaultValue="profil">
         <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${4 + (showLocationTab ? 1 : 0) + (showStripeTab ? 1 : 0)}, minmax(0, 1fr))` }}>
-          <TabsTrigger value="profil"><User className="w-4 h-4 mr-1" />Profil</TabsTrigger>
-          <TabsTrigger value="rechnung"><FileText className="w-4 h-4 mr-1" />Rechnung</TabsTrigger>
-          {showLocationTab && <TabsTrigger value="location"><MapPin className="w-4 h-4 mr-1" />Location</TabsTrigger>}
-          <TabsTrigger value="kursvorschlag"><Lightbulb className="w-4 h-4 mr-1" />Kurs vorschlagen</TabsTrigger>
-          <TabsTrigger value="auszahlung"><Banknote className="w-4 h-4 mr-1" />Auszahlung</TabsTrigger>
-          {showStripeTab && <TabsTrigger value="stripe"><CreditCard className="w-4 h-4 mr-1" />Stripe</TabsTrigger>}
+          <TabsTrigger value="profil"><User className="w-4 h-4 mr-1" />{t('artist.tabs.profile')}</TabsTrigger>
+          <TabsTrigger value="rechnung"><FileText className="w-4 h-4 mr-1" />{t('artist.tabs.invoice')}</TabsTrigger>
+          {showLocationTab && <TabsTrigger value="location"><MapPin className="w-4 h-4 mr-1" />{t('artist.tabs.location')}</TabsTrigger>}
+          <TabsTrigger value="kursvorschlag"><Lightbulb className="w-4 h-4 mr-1" />{t('artist.tabs.propose')}</TabsTrigger>
+          <TabsTrigger value="auszahlung"><Banknote className="w-4 h-4 mr-1" />{t('artist.tabs.payout')}</TabsTrigger>
+          {showStripeTab && <TabsTrigger value="stripe"><CreditCard className="w-4 h-4 mr-1" />{t('artist.tabs.stripe')}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="profil">
           <Card className="p-6 space-y-5">
-            {/* Avatar */}
             <div className="flex items-center gap-5">
               <div className="w-20 h-20 rounded-full overflow-hidden bg-muted flex items-center justify-center border-2 border-border">
                 {profile.avatar_url ? (
@@ -169,26 +170,26 @@ export default function ArtistSetup() {
               <label className="cursor-pointer">
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                 <Button type="button" variant="outline" size="sm" asChild>
-                  <span>{uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Upload className="w-4 h-4 mr-2" />Foto hochladen</>}</span>
+                  <span>{uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Upload className="w-4 h-4 mr-2" />{t('artist.uploadPhoto')}</>}</span>
                 </Button>
               </label>
             </div>
 
             <div className="space-y-2">
-              <Label>Künstlername *</Label>
-              <Input value={profile.display_name} onChange={e => update('display_name', e.target.value)} placeholder="Dein Künstlername" />
+              <Label>{t('artist.artistName')}</Label>
+              <Input value={profile.display_name} onChange={e => update('display_name', e.target.value)} placeholder={t('artist.artistName').replace(' *', '')} />
             </div>
             <div className="space-y-2">
-              <Label>Biographie</Label>
-              <Textarea value={profile.bio} onChange={e => update('bio', e.target.value)} rows={4} placeholder="Erzähle etwas über dich und deine Kunst..." />
+              <Label>{t('artist.bio')}</Label>
+              <Textarea value={profile.bio} onChange={e => update('bio', e.target.value)} rows={4} placeholder={t('artist.bioPlaceholder')} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Website</Label>
+                <Label>{t('artist.website')}</Label>
                 <Input value={profile.website} onChange={e => update('website', e.target.value)} placeholder="https://..." />
               </div>
               <div className="space-y-2">
-                <Label>Instagram</Label>
+                <Label>{t('artist.instagram')}</Label>
                 <Input value={profile.instagram} onChange={e => update('instagram', e.target.value)} placeholder="@dein_handle" />
               </div>
             </div>
@@ -216,22 +217,19 @@ export default function ArtistSetup() {
             <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
               <CreditCard className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
               <div>
-                <p className="font-medium text-amber-800">Stripe Connect – Builder+ erforderlich</p>
-                <p className="text-sm text-amber-700 mt-1">
-                  Für echte Stripe-Zahlungen direkt auf dein Konto ist ein Backend (Builder+-Abo) erforderlich.
-                  Dann verbindest du hier dein Stripe-Konto und erhältst Zahlungen automatisch, abzüglich der Plattform-Provision.
-                </p>
+                <p className="font-medium text-amber-800">{t('artist.stripeTitle')}</p>
+                <p className="text-sm text-amber-700 mt-1">{t('artist.stripeDesc')}</p>
               </div>
             </div>
             {existingProfile?.stripe_account_id ? (
               <div className="flex items-center gap-2 text-primary">
                 <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">Stripe-Konto verbunden</span>
+                <span className="font-medium">{t('artist.stripeConnected')}</span>
               </div>
             ) : (
               <Button disabled variant="outline" className="w-full">
                 <CreditCard className="w-4 h-4 mr-2" />
-                Mit Stripe verbinden (bald verfügbar)
+                {t('artist.stripeConnect')}
               </Button>
             )}
           </Card>
@@ -241,7 +239,7 @@ export default function ArtistSetup() {
       <div className="flex justify-end">
         <Button onClick={handleSave} className="bg-primary hover:bg-primary/90" disabled={saveMutation.isPending}>
           {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Profil speichern
+          {t('artist.saveProfile')}
         </Button>
       </div>
     </div>

@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function InvoiceForm({ onSubmit, onCancel, isSubmitting, nextNumber }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     invoice_number: nextNumber || '',
     client_name: '',
@@ -54,60 +56,59 @@ export default function InvoiceForm({ onSubmit, onCancel, isSubmitting, nextNumb
 
   return (
     <Card className="p-6">
-      <h2 className="font-display text-xl font-semibold mb-6">Neue Rechnung</h2>
+      <h2 className="font-display text-xl font-semibold mb-6">{t('invoiceForm.title')}</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Rechnungsnummer</Label>
+            <Label>{t('invoiceForm.invoiceNumber')}</Label>
             <Input value={form.invoice_number} onChange={(e) => setForm(p => ({ ...p, invoice_number: e.target.value }))} required />
           </div>
           <div className="space-y-2">
-            <Label>Fälligkeitsdatum</Label>
+            <Label>{t('invoiceForm.dueDate')}</Label>
             <Input type="date" value={form.due_date} onChange={(e) => setForm(p => ({ ...p, due_date: e.target.value }))} />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Kundenname *</Label>
+            <Label>{t('invoiceForm.clientName')}</Label>
             <Input value={form.client_name} onChange={(e) => setForm(p => ({ ...p, client_name: e.target.value }))} required />
           </div>
           <div className="space-y-2">
-            <Label>Kunden-E-Mail</Label>
+            <Label>{t('invoiceForm.clientEmail')}</Label>
             <Input type="email" value={form.client_email} onChange={(e) => setForm(p => ({ ...p, client_email: e.target.value }))} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Kundenadresse</Label>
+          <Label>{t('invoiceForm.clientAddress')}</Label>
           <Textarea value={form.client_address} onChange={(e) => setForm(p => ({ ...p, client_address: e.target.value }))} rows={2} />
         </div>
 
-        {/* Items */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <Label className="text-base">Positionen</Label>
+            <Label className="text-base">{t('invoiceForm.positions')}</Label>
             <Button type="button" variant="outline" size="sm" onClick={addItem}>
-              <Plus className="w-3 h-3 mr-1" />Hinzufügen
+              <Plus className="w-3 h-3 mr-1" />{t('invoiceForm.add')}
             </Button>
           </div>
           <div className="space-y-3">
             {form.items.map((item, idx) => (
               <div key={idx} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-12 sm:col-span-5">
-                  {idx === 0 && <Label className="text-xs text-muted-foreground">Beschreibung</Label>}
-                  <Input value={item.description} onChange={(e) => updateItem(idx, 'description', e.target.value)} placeholder="Beschreibung" />
+                  {idx === 0 && <Label className="text-xs text-muted-foreground">{t('invoiceForm.description')}</Label>}
+                  <Input value={item.description} onChange={(e) => updateItem(idx, 'description', e.target.value)} placeholder={t('invoiceForm.description')} />
                 </div>
                 <div className="col-span-4 sm:col-span-2">
-                  {idx === 0 && <Label className="text-xs text-muted-foreground">Menge</Label>}
+                  {idx === 0 && <Label className="text-xs text-muted-foreground">{t('invoiceForm.quantity')}</Label>}
                   <Input type="number" min="0" value={item.quantity} onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="col-span-4 sm:col-span-2">
-                  {idx === 0 && <Label className="text-xs text-muted-foreground">Preis (€)</Label>}
+                  {idx === 0 && <Label className="text-xs text-muted-foreground">{t('invoiceForm.price')}</Label>}
                   <Input type="number" min="0" step="0.01" value={item.unit_price} onChange={(e) => updateItem(idx, 'unit_price', parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="col-span-3 sm:col-span-2">
-                  {idx === 0 && <Label className="text-xs text-muted-foreground">Summe</Label>}
+                  {idx === 0 && <Label className="text-xs text-muted-foreground">{t('invoiceForm.sum')}</Label>}
                   <p className="h-10 flex items-center font-medium">{item.total.toFixed(2)} €</p>
                 </div>
                 <div className="col-span-1">
@@ -120,32 +121,31 @@ export default function InvoiceForm({ onSubmit, onCancel, isSubmitting, nextNumb
           </div>
         </div>
 
-        {/* Tax & Total */}
         <div className="flex flex-col items-end gap-2 pt-4 border-t">
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-muted-foreground">Zwischensumme:</span>
+            <span className="text-muted-foreground">{t('invoiceForm.subtotal')}</span>
             <span className="font-medium w-24 text-right">{subtotal.toFixed(2)} €</span>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-muted-foreground">MwSt. ({form.tax_rate}%):</span>
+            <span className="text-muted-foreground">{t('invoiceForm.vat', { rate: form.tax_rate })}</span>
             <span className="font-medium w-24 text-right">{taxAmount.toFixed(2)} €</span>
           </div>
           <div className="flex items-center gap-4 text-lg font-bold">
-            <span>Gesamt:</span>
+            <span>{t('invoiceForm.total')}</span>
             <span className="w-24 text-right text-primary">{totalAmount.toFixed(2)} €</span>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Anmerkungen</Label>
-          <Textarea value={form.notes} onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))} rows={2} placeholder="Zahlungsbedingungen, Bankdaten, etc." />
+          <Label>{t('invoiceForm.notes')}</Label>
+          <Textarea value={form.notes} onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))} rows={2} placeholder={t('invoiceForm.notesPlaceholder')} />
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onCancel}>Abbrechen</Button>
+          <Button type="button" variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
           <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Rechnung erstellen
+            {t('invoiceForm.create')}
           </Button>
         </div>
       </form>

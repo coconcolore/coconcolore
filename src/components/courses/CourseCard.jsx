@@ -2,39 +2,41 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, Link2, Check } from 'lucide-react';
+import { Clock, Users, Link2, Check, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const categoryLabels = {
-  malerei: 'Malerei',
-  zeichnung: 'Zeichnung',
-  fotografie: 'Fotografie',
-  skulptur: 'Skulptur',
-  digitale_kunst: 'Digitale Kunst',
-  musik: 'Musik',
-  tanz: 'Tanz',
-  sonstiges: 'Sonstiges',
-};
-
-const statusLabels = {
-  entwurf: 'Entwurf',
-  ausstehend_freigabe: 'Wartet auf Freigabe',
-  freigegeben_intern: 'Intern freigegeben',
-  veroeffentlicht: 'Veröffentlicht',
-  abgelehnt: 'Abgelehnt',
-  archiviert: 'Archiviert',
-};
-
-const statusColors = {
-  entwurf: 'bg-muted text-muted-foreground',
-  ausstehend_freigabe: 'bg-amber-100 text-amber-700',
-  freigegeben_intern: 'bg-blue-100 text-blue-700',
-  veroeffentlicht: 'bg-primary/10 text-primary',
-  abgelehnt: 'bg-red-100 text-red-700',
-  archiviert: 'bg-destructive/10 text-destructive',
-};
-
-export default function CourseCard({ course, enrollmentCount = 0, linkTo }) {
+export default function CourseCard({ course, enrollmentCount = 0, pendingCount = 0, linkTo }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
+
+  const statusLabels = {
+    entwurf: t('courses.status.entwurf'),
+    ausstehend_freigabe: t('courses.status.ausstehend_freigabe'),
+    freigegeben_intern: t('courses.status.freigegeben_intern'),
+    veroeffentlicht: t('courses.status.veroeffentlicht'),
+    abgelehnt: t('courses.status.abgelehnt'),
+    archiviert: t('courses.status.archiviert'),
+  };
+
+  const categoryLabels = {
+    malerei: t('courses.category.malerei'),
+    zeichnung: t('courses.category.zeichnung'),
+    fotografie: t('courses.category.fotografie'),
+    skulptur: t('courses.category.skulptur'),
+    digitale_kunst: t('courses.category.digitale_kunst'),
+    musik: t('courses.category.musik'),
+    tanz: t('courses.category.tanz'),
+    sonstiges: t('courses.category.sonstiges'),
+  };
+
+  const statusColors = {
+    entwurf: 'bg-muted text-muted-foreground',
+    ausstehend_freigabe: 'bg-amber-100 text-amber-700',
+    freigegeben_intern: 'bg-blue-100 text-blue-700',
+    veroeffentlicht: 'bg-primary/10 text-primary',
+    abgelehnt: 'bg-red-100 text-red-700',
+    archiviert: 'bg-destructive/10 text-destructive',
+  };
 
   const handleCopyLink = (e) => {
     e.preventDefault();
@@ -51,8 +53,8 @@ export default function CourseCard({ course, enrollmentCount = 0, linkTo }) {
       <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-md">
         <div className="aspect-video bg-muted relative overflow-hidden">
           {course.image_url ? (
-            <img 
-              src={course.image_url} 
+            <img
+              src={course.image_url}
               alt={course.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -91,6 +93,12 @@ export default function CourseCard({ course, enrollmentCount = 0, linkTo }) {
                 <Users className="w-3 h-3" />
                 {enrollmentCount}
               </span>
+              {pendingCount > 0 && (
+                <span className="flex items-center gap-1 text-amber-600 font-medium">
+                  <Clock className="w-3 h-3" />
+                  {pendingCount} {t('courses.pendingPayments')}
+                </span>
+              )}
             </div>
             <span className="text-lg font-bold text-primary">
               {course.price?.toFixed(2)} €
@@ -105,7 +113,7 @@ export default function CourseCard({ course, enrollmentCount = 0, linkTo }) {
         className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors self-start px-1 py-0.5"
       >
         {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Link2 className="w-3.5 h-3.5" />}
-        {copied ? 'Link kopiert!' : 'Buchungslink kopieren'}
+        {copied ? t('courses.linkCopied') : t('courses.copyLink')}
       </button>
     )}
     </div>

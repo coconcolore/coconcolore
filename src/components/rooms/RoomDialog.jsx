@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Loader2, X, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const EQUIPMENT_SUGGESTIONS = [
   'Staffelei', 'Waschbecken', 'Beamer', 'Leinwand', 'Tische', 'Stühle',
@@ -20,8 +21,10 @@ const EQUIPMENT_SUGGESTIONS = [
 export default function RoomDialog({ room, onClose, onSave }) {
   const queryClient = useQueryClient();
   const isEdit = !!room;
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: room?.name || '',
+    address: room?.address || '',
     description: room?.description || '',
     capacity: room?.capacity || '',
     size_sqm: room?.size_sqm || '',
@@ -58,7 +61,7 @@ export default function RoomDialog({ room, onClose, onSave }) {
       : api.entities.Room.create(data),
     onSuccess: (savedRoom) => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      toast.success(isEdit ? 'Raum aktualisiert!' : 'Raum erstellt!');
+      toast.success(isEdit ? t('room.updatedSuccess') : t('room.createdSuccess'));
       onSave(savedRoom);
     },
   });
@@ -76,31 +79,34 @@ export default function RoomDialog({ room, onClose, onSave }) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display">{isEdit ? 'Raum bearbeiten' : 'Neuen Raum anlegen'}</DialogTitle>
+          <DialogTitle className="font-display">{isEdit ? t('room.titleEdit') : t('room.titleCreate')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Raumname *</Label>
-            <Input value={form.name} onChange={e => update('name', e.target.value)} placeholder="z.B. Raum A, Atelier 1, Großer Saal" required />
+            <Label>{t('room.nameLabel')}</Label>
+            <Input value={form.name} onChange={e => update('name', e.target.value)} placeholder={t('room.namePlaceholder')} required />
           </div>
           <div className="space-y-2">
-            <Label>Beschreibung</Label>
-            <Textarea value={form.description} onChange={e => update('description', e.target.value)} rows={2} placeholder="Kurze Beschreibung des Raums..." />
+            <Label>{t('room.address')}</Label>
+            <Input value={form.address} onChange={e => update('address', e.target.value)} placeholder={t('room.addressPlaceholder')} />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('room.description')}</Label>
+            <Textarea value={form.description} onChange={e => update('description', e.target.value)} rows={2} placeholder={t('room.descPlaceholder')} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Kapazität (Personen)</Label>
+              <Label>{t('room.capacity')}</Label>
               <Input type="number" min="1" value={form.capacity} onChange={e => update('capacity', e.target.value)} placeholder="z.B. 12" />
             </div>
             <div className="space-y-2">
-              <Label>Größe (m²)</Label>
+              <Label>{t('room.size')}</Label>
               <Input type="number" min="1" value={form.size_sqm} onChange={e => update('size_sqm', e.target.value)} placeholder="z.B. 40" />
             </div>
           </div>
 
-          {/* Bilder */}
           <div className="space-y-2">
-            <Label>Bilder des Raums</Label>
+            <Label>{t('room.images')}</Label>
             <div className="grid grid-cols-3 gap-2">
               {form.image_urls.map((url, idx) => (
                 <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-border">
@@ -127,7 +133,7 @@ export default function RoomDialog({ room, onClose, onSave }) {
                     setUploadingImg(false);
                   }} />
                   <ImagePlus className="w-5 h-5 text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground">Hinzufügen</span>
+                  <span className="text-xs text-muted-foreground">{t('room.addImage')}</span>
                 </label>
               )}
               {uploadingImg && (
@@ -138,9 +144,8 @@ export default function RoomDialog({ room, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Ausstattung */}
           <div className="space-y-2">
-            <Label>Ausstattung</Label>
+            <Label>{t('room.equipment')}</Label>
             <div className="flex flex-wrap gap-2">
               {EQUIPMENT_SUGGESTIONS.map(item => (
                 <button
@@ -161,7 +166,7 @@ export default function RoomDialog({ room, onClose, onSave }) {
               <Input
                 value={customEquip}
                 onChange={e => setCustomEquip(e.target.value)}
-                placeholder="Eigene Ausstattung hinzufügen..."
+                placeholder={t('room.addCustomEquip')}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustom())}
                 className="text-sm"
               />
@@ -182,20 +187,20 @@ export default function RoomDialog({ room, onClose, onSave }) {
           </div>
 
           <div className="space-y-2">
-            <Label>Interne Notizen</Label>
-            <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} placeholder="z.B. Schlüssel bei Rezeption..." />
+            <Label>{t('room.notes')}</Label>
+            <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} placeholder={t('room.notesPlaceholder')} />
           </div>
 
           <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
             <Switch checked={form.is_bookable} onCheckedChange={v => update('is_bookable', v)} />
-            <Label>Raum ist buchbar</Label>
+            <Label>{t('room.bookable')}</Label>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
+            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
             <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={saveMutation.isPending}>
               {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {isEdit ? 'Speichern' : 'Raum anlegen'}
+              {isEdit ? t('common.save') : t('room.create')}
             </Button>
           </div>
         </form>

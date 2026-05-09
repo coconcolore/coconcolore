@@ -20,10 +20,12 @@ import PublicCatalog from '@/pages/PublicCatalog';
 import SharedCalendar from '@/pages/SharedCalendar';
 import Login from '@/pages/Login';
 import AccessPending from '@/pages/AccessPending';
+import LegalTextPage from '@/pages/LegalTextPage';
 
 const PublicRoutes = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
+    <Route path="/rechtliches/:legalType" element={<LegalTextPage />} />
     <Route path="/kurs/:id" element={<PublicCoursePage />} />
     <Route path="/kuenstler/:id" element={<ArtistPublicProfile />} />
     <Route path="/kurskatalog-public" element={<PublicCatalog />} />

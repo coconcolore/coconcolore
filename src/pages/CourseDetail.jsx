@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  ArrowLeft, Plus, GripVertical, Trash2, 
+import {
+  ArrowLeft, Plus, GripVertical, Trash2,
   Eye, Pencil, Globe, Archive, Loader2, CheckCircle, XCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,35 +22,38 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-
-const statusLabels = {
-  entwurf: 'Entwurf',
-  ausstehend_freigabe: 'Wartet auf Freigabe',
-  freigegeben_intern: 'Intern freigegeben',
-  veroeffentlicht: 'Veröffentlicht',
-  abgelehnt: 'Abgelehnt',
-  archiviert: 'Archiviert'
-};
-const statusColors = {
-  entwurf: 'bg-muted text-muted-foreground',
-  ausstehend_freigabe: 'bg-amber-100 text-amber-700',
-  freigegeben_intern: 'bg-blue-100 text-blue-700',
-  veroeffentlicht: 'bg-primary/10 text-primary',
-  abgelehnt: 'bg-red-100 text-red-700',
-  archiviert: 'bg-destructive/10 text-destructive'
-};
+import { useTranslation } from 'react-i18next';
 
 export default function CourseDetail() {
   const { id: routeCourseId } = useParams();
   const courseId = routeCourseId ? routeCourseId.replace(/\/+$/, '') : '';
   const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.auth.me().then(setUser).catch(() => {});
   }, []);
   const [lessonDialog, setLessonDialog] = useState(false);
   const [newLesson, setNewLesson] = useState({ title: '', content: '', video_url: '', is_free_preview: false });
+
+  const statusLabels = {
+    entwurf: t('courses.status.entwurf'),
+    ausstehend_freigabe: t('courses.status.ausstehend_freigabe'),
+    freigegeben_intern: t('courses.status.freigegeben_intern'),
+    veroeffentlicht: t('courses.status.veroeffentlicht'),
+    abgelehnt: t('courses.status.abgelehnt'),
+    archiviert: t('courses.status.archiviert'),
+  };
+
+  const statusColors = {
+    entwurf: 'bg-muted text-muted-foreground',
+    ausstehend_freigabe: 'bg-amber-100 text-amber-700',
+    freigegeben_intern: 'bg-blue-100 text-blue-700',
+    veroeffentlicht: 'bg-primary/10 text-primary',
+    abgelehnt: 'bg-red-100 text-red-700',
+    archiviert: 'bg-destructive/10 text-destructive'
+  };
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ['course', courseId],
@@ -84,7 +87,7 @@ export default function CourseDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course', courseId] });
       queryClient.invalidateQueries({ queryKey: ['courses'] });
-      toast.success('Status aktualisiert');
+      toast.success(t('courseDetail.statusUpdated'));
     },
   });
 
@@ -94,7 +97,7 @@ export default function CourseDetail() {
       queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
       setLessonDialog(false);
       setNewLesson({ title: '', content: '', video_url: '', is_free_preview: false });
-      toast.success('Lektion hinzugefügt');
+      toast.success(t('courseDetail.lessonAdded'));
     },
   });
 
@@ -102,7 +105,7 @@ export default function CourseDetail() {
     mutationFn: (id) => api.entities.Lesson.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lessons', courseId] });
-      toast.success('Lektion gelöscht');
+      toast.success(t('courseDetail.lessonDeleted'));
     },
   });
 
@@ -120,12 +123,11 @@ export default function CourseDetail() {
   }
 
   if (!course) {
-    return <div className="text-center py-16"><p className="text-muted-foreground">Kurs nicht gefunden</p></div>;
+    return <div className="text-center py-16"><p className="text-muted-foreground">{t('courseDetail.notFound')}</p></div>;
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <Link to="/courses">
@@ -137,54 +139,57 @@ export default function CourseDetail() {
               <Badge className={statusColors[course.status]}>{statusLabels[course.status]}</Badge>
             </div>
             <p className="text-muted-foreground">{course.description}</p>
-            <p className="text-lg font-bold text-primary mt-2">{course.price?.toFixed(2)} € · {bookings.filter(b => b.payment_status !== 'erstattet').length} Buchungen</p>
+            <p className="text-lg font-bold text-primary mt-2">
+              {course.price?.toFixed(2)} € · {bookings.filter(b => b.payment_status === 'bezahlt').length} {t('courseDetail.bookingsCount')}
+              {bookings.filter(b => b.payment_status === 'ausstehend').length > 0 && (
+                <span className="text-sm font-normal text-amber-600 ml-2">
+                  · {bookings.filter(b => b.payment_status === 'ausstehend').length} {t('courseDetail.pendingPayments')}
+                </span>
+              )}
+            </p>
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* Vorschau für Künstler, Manager und Admins */}
           {(user?.role === 'kuenstler' || user?.role === 'kuenstler_manager' || user?.role === 'admin') && (
             <a href={`/kurs/${courseId}?preview=true`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline">
-                <Eye className="w-4 h-4 mr-2" />Vorschau
+                <Eye className="w-4 h-4 mr-2" />{t('courseDetail.preview')}
               </Button>
             </a>
           )}
-          {/* Künstler: Entwurf (oder überarbeitete Ablehnung) einreichen */}
           {user?.role === 'kuenstler' && (course.status === 'entwurf' || course.status === 'abgelehnt') && (
             <Button onClick={() => updateStatusMutation.mutate({ status: 'ausstehend_freigabe' })} className="bg-primary hover:bg-primary/90">
-              <Globe className="w-4 h-4 mr-2" />Zur Freigabe einreichen
+              <Globe className="w-4 h-4 mr-2" />{t('courseDetail.submitForApproval')}
             </Button>
           )}
-          {/* Manager & Admin: interne inhaltliche Freigabe */}
           {(user?.role === 'kuenstler_manager' || user?.role === 'admin') && course.status === 'ausstehend_freigabe' && (
             <Button onClick={() => updateStatusMutation.mutate({ status: 'freigegeben_intern' })} className="bg-primary hover:bg-primary/90">
-              <CheckCircle className="w-4 h-4 mr-2" />Intern freigeben
+              <CheckCircle className="w-4 h-4 mr-2" />{t('courseDetail.approveInternally')}
             </Button>
           )}
           {(user?.role === 'kuenstler_manager' || user?.role === 'admin') && course.status === 'ausstehend_freigabe' && (
             <Button
               variant="outline"
               onClick={() => {
-                const note = window.prompt('Ablehnungsgrund für den Künstler:');
+                const note = window.prompt(t('courseDetail.rejectPrompt'));
                 if (!note || !note.trim()) {
-                  toast.error('Bitte einen Ablehnungsgrund eingeben.');
+                  toast.error(t('courseDetail.rejectEmpty'));
                   return;
                 }
                 updateStatusMutation.mutate({ status: 'abgelehnt', admin_notes: note.trim() });
               }}
             >
-              <XCircle className="w-4 h-4 mr-2" />Ablehnen
+              <XCircle className="w-4 h-4 mr-2" />{t('courseDetail.reject')}
             </Button>
           )}
-          {/* Manager & Admin: Veröffentlichung erst nach interner Freigabe */}
           {(user?.role === 'kuenstler_manager' || user?.role === 'admin') && course.status === 'freigegeben_intern' && (
             <Button onClick={() => updateStatusMutation.mutate({ status: 'veroeffentlicht' })} className="bg-primary hover:bg-primary/90">
-              <Globe className="w-4 h-4 mr-2" />Veröffentlichen
+              <Globe className="w-4 h-4 mr-2" />{t('courseDetail.publish')}
             </Button>
           )}
           {(user?.role === 'kuenstler_manager' || user?.role === 'admin') && course.status === 'veroeffentlicht' && (
             <Button variant="outline" onClick={() => updateStatusMutation.mutate({ status: 'archiviert' })}>
-              <Archive className="w-4 h-4 mr-2" />Archivieren
+              <Archive className="w-4 h-4 mr-2" />{t('courseDetail.archive')}
             </Button>
           )}
         </div>
@@ -192,47 +197,46 @@ export default function CourseDetail() {
 
       {course.status === 'abgelehnt' && course.admin_notes && (
         <Card className="p-4 border border-red-200 bg-red-50">
-          <h3 className="font-semibold text-red-800 mb-1">Feedback vom Atelier</h3>
+          <h3 className="font-semibold text-red-800 mb-1">{t('courseDetail.feedbackTitle')}</h3>
           <p className="text-sm text-red-700 whitespace-pre-wrap">{course.admin_notes}</p>
         </Card>
       )}
 
-      {/* Lessons */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-xl font-semibold">Lektionen ({lessons.length})</h2>
+          <h2 className="font-display text-xl font-semibold">{t('courseDetail.lessons', { count: lessons.length })}</h2>
           <Dialog open={lessonDialog} onOpenChange={setLessonDialog}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" />Lektion hinzufügen
+                <Plus className="w-4 h-4 mr-2" />{t('courseDetail.addLesson')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-display">Neue Lektion</DialogTitle>
+                <DialogTitle className="font-display">{t('courseDetail.newLesson')}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreateLesson} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Titel *</Label>
+                  <Label>{t('courseDetail.lessonTitle')}</Label>
                   <Input value={newLesson.title} onChange={(e) => setNewLesson(p => ({ ...p, title: e.target.value }))} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Inhalt</Label>
+                  <Label>{t('courseDetail.lessonContent')}</Label>
                   <Textarea value={newLesson.content} onChange={(e) => setNewLesson(p => ({ ...p, content: e.target.value }))} rows={4} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Video URL</Label>
+                  <Label>{t('courseDetail.lessonVideoUrl')}</Label>
                   <Input value={newLesson.video_url} onChange={(e) => setNewLesson(p => ({ ...p, video_url: e.target.value }))} placeholder="https://..." />
                 </div>
                 <div className="flex items-center gap-3">
                   <Switch checked={newLesson.is_free_preview} onCheckedChange={(c) => setNewLesson(p => ({ ...p, is_free_preview: c }))} />
-                  <Label>Kostenlose Vorschau</Label>
+                  <Label>{t('courseDetail.freePreview')}</Label>
                 </div>
                 <div className="flex justify-end gap-3">
-                  <Button type="button" variant="outline" onClick={() => setLessonDialog(false)}>Abbrechen</Button>
+                  <Button type="button" variant="outline" onClick={() => setLessonDialog(false)}>{t('common.cancel')}</Button>
                   <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={createLessonMutation.isPending}>
                     {createLessonMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Erstellen
+                    {t('common.create')}
                   </Button>
                 </div>
               </form>
@@ -244,7 +248,7 @@ export default function CourseDetail() {
           <div className="space-y-3">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
         ) : lessons.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p>Noch keine Lektionen. Füge deine erste Lektion hinzu!</p>
+            <p>{t('courseDetail.noLessons')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -254,7 +258,7 @@ export default function CourseDetail() {
                 <span className="text-sm font-medium text-muted-foreground w-8">{idx + 1}.</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{lesson.title}</p>
-                  {lesson.is_free_preview && <Badge variant="outline" className="mt-1 text-xs">Vorschau</Badge>}
+                  {lesson.is_free_preview && <Badge variant="outline" className="mt-1 text-xs">{t('courseDetail.lessonPreviewBadge')}</Badge>}
                 </div>
                 <Button
                   variant="ghost"

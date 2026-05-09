@@ -6,8 +6,11 @@ import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 export default function AccessPending() {
+  const { t, i18n } = useTranslation();
+
   const { data: me, isLoading: loadingMe, refetch: refetchMe } = useQuery({
     queryKey: ['me-pending-access'],
     queryFn: () => api.auth.me()
@@ -28,22 +31,22 @@ export default function AccessPending() {
 
   const status = !profile
     ? {
-        title: 'Noch kein Künstlerprofil eingereicht',
-        description: 'Bitte hinterlege dein Profil im nächsten Schritt, damit Admin oder Manager dich freischalten können.',
-        badge: 'Profil fehlt',
+        title: t('access.noProfile.title'),
+        description: t('access.noProfile.desc'),
+        badge: t('access.noProfile.badge'),
         icon: UserRoundPlus
       }
     : !profile.is_approved
       ? {
-          title: 'Profil eingereicht, Freischaltung ausstehend',
-          description: 'Dein Profil liegt zur Prüfung vor. Nach der Freigabe erhältst du Zugriff auf Kurse, Rechnungen und weitere Backend-Bereiche.',
-          badge: 'Wartet auf Freigabe',
+          title: t('access.pending.title'),
+          description: t('access.pending.desc'),
+          badge: t('access.pending.badge'),
           icon: Clock3
         }
       : {
-          title: 'Profil freigeschaltet, Zugang wird vorbereitet',
-          description: 'Dein Künstlerprofil ist freigegeben. Falls dein Zugriff noch nicht aktiv ist, lade die Seite neu oder melde dich einmal ab und wieder an.',
-          badge: 'Fast bereit',
+          title: t('access.approved.title'),
+          description: t('access.approved.desc'),
+          badge: t('access.approved.badge'),
           icon: CircleCheckBig
         };
 
@@ -52,10 +55,31 @@ export default function AccessPending() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/60 px-4 py-10 flex items-center justify-center">
       <Card className="w-full max-w-2xl p-6 md:p-8 space-y-6">
+        <div className="flex justify-end">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`h-7 px-2 text-xs font-medium ${i18n.language?.startsWith('de') ? 'bg-muted' : 'text-muted-foreground'}`}
+              onClick={() => i18n.changeLanguage('de')}
+            >
+              DE
+            </Button>
+            <span className="text-muted-foreground/50 text-xs">|</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`h-7 px-2 text-xs font-medium ${!i18n.language?.startsWith('de') ? 'bg-muted' : 'text-muted-foreground'}`}
+              onClick={() => i18n.changeLanguage('en')}
+            >
+              EN
+            </Button>
+          </div>
+        </div>
         <div className="space-y-2 text-center">
           <p className="text-sm uppercase tracking-wide text-muted-foreground">cocon coloré</p>
-          <h1 className="font-display text-3xl md:text-4xl font-bold">Zugang wird freigeschaltet</h1>
-          <p className="text-muted-foreground">Dein Account ist registriert, aber noch nicht für alle internen Bereiche aktiv.</p>
+          <h1 className="font-display text-3xl md:text-4xl font-bold">{t('access.title')}</h1>
+          <p className="text-muted-foreground">{t('access.subtitle')}</p>
         </div>
 
         <div className="rounded-xl border bg-muted/30 p-5 flex items-start gap-4">
@@ -66,19 +90,19 @@ export default function AccessPending() {
             <Badge variant="outline">{status.badge}</Badge>
             <h2 className="font-semibold text-lg">{status.title}</h2>
             <p className="text-sm text-muted-foreground">{status.description}</p>
-            {me?.email && <p className="text-xs text-muted-foreground">Account: {me.email}</p>}
+            {me?.email && <p className="text-xs text-muted-foreground">{t('access.account')} {me.email}</p>}
           </div>
         </div>
 
         <div className="rounded-xl border p-4 bg-background space-y-2">
-          <p className="font-medium">Nächste Schritte</p>
+          <p className="font-medium">{t('access.nextSteps')}</p>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Status wird geladen...</p>
+            <p className="text-sm text-muted-foreground">{t('access.loadingStatus')}</p>
           ) : (
             <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-              <li>Profil vollständig hinterlegen (Mein Profil)</li>
-              <li>Freigabe durch Admin oder Künstler-Manager abwarten</li>
-              <li>Nach Freigabe erneut einloggen</li>
+              <li>{t('access.step1')}</li>
+              <li>{t('access.step2')}</li>
+              <li>{t('access.step3')}</li>
             </ul>
           )}
         </div>
@@ -92,12 +116,12 @@ export default function AccessPending() {
             }}
             disabled={isLoading}
           >
-            <RefreshCw className="w-4 h-4 mr-2" />Status aktualisieren
+            <RefreshCw className="w-4 h-4 mr-2" />{t('access.refreshStatus')}
           </Button>
           <Link to="/kurskatalog-public">
-            <Button variant="outline">Öffentlicher Kurskatalog</Button>
+            <Button variant="outline">{t('access.publicCatalog')}</Button>
           </Link>
-          <Button onClick={() => api.auth.logout()}>Abmelden</Button>
+          <Button onClick={() => api.auth.logout()}>{t('access.logout')}</Button>
         </div>
       </Card>
     </div>

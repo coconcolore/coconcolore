@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Save, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULTS = {
   impressum: `cocon coloré
@@ -71,6 +72,7 @@ Sie können sich bei der Berliner Beauftragten für Datenschutz und Informations
 
 export default function LegalTextsTab() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: settings = [] } = useQuery({
     queryKey: ['platform-settings'],
@@ -108,7 +110,7 @@ export default function LegalTextsTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['platform-settings'] });
-      toast.success('Rechtstexte gespeichert!');
+      toast.success(t('legalTexts.saved'));
     },
   });
 
@@ -117,26 +119,24 @@ export default function LegalTextsTab() {
   };
 
   const sections = [
-    { key: 'impressum', label: 'Impressum' },
-    { key: 'agb', label: 'AGB' },
-    { key: 'datenschutz', label: 'Datenschutz' },
+    { key: 'impressum', label: t('legalTexts.impressum') },
+    { key: 'agb', label: t('legalTexts.agb') },
+    { key: 'datenschutz', label: t('legalTexts.datenschutz') },
   ];
 
   return (
     <div className="space-y-4 mt-6">
       <div className="flex items-center gap-2 mb-2">
         <FileText className="w-5 h-5 text-muted-foreground" />
-        <h2 className="font-semibold text-lg">Rechtstexte bearbeiten</h2>
+        <h2 className="font-semibold text-lg">{t('legalTexts.title')}</h2>
       </div>
-      <p className="text-sm text-muted-foreground">
-        Diese Texte werden im Footer der Plattform angezeigt. Änderungen werden sofort wirksam.
-      </p>
+      <p className="text-sm text-muted-foreground">{t('legalTexts.desc')}</p>
 
       <Tabs defaultValue="impressum">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="impressum">Impressum</TabsTrigger>
-          <TabsTrigger value="agb">AGB</TabsTrigger>
-          <TabsTrigger value="datenschutz">Datenschutz</TabsTrigger>
+          <TabsTrigger value="impressum">{t('legalTexts.impressum')}</TabsTrigger>
+          <TabsTrigger value="agb">{t('legalTexts.agb')}</TabsTrigger>
+          <TabsTrigger value="datenschutz">{t('legalTexts.datenschutz')}</TabsTrigger>
         </TabsList>
 
         {sections.map(({ key, label }) => (
@@ -149,7 +149,7 @@ export default function LegalTextsTab() {
                   onChange={e => setTexts(p => ({ ...p, [key]: e.target.value }))}
                   rows={20}
                   className="font-mono text-sm resize-y"
-                  placeholder={`${label} hier eingeben...`}
+                  placeholder={t('legalTexts.placeholder', { label })}
                 />
               </div>
               <div className="flex justify-end">
@@ -159,7 +159,7 @@ export default function LegalTextsTab() {
                   disabled={saveMutation.isPending}
                 >
                   {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  {label} speichern
+                  {t('legalTexts.save', { label })}
                 </Button>
               </div>
             </Card>

@@ -4,6 +4,7 @@ import { api } from '@/api/client';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 function LegalDialog({ open, onClose, title, text }) {
   return (
@@ -20,10 +21,8 @@ function LegalDialog({ open, onClose, title, text }) {
   );
 }
 
-
-
-
 function CookieDialog({ open, onClose }) {
+  const { t } = useTranslation();
   const [analytics, setAnalytics] = useState(() => {
     return localStorage.getItem('cookie_analytics') !== 'false';
   });
@@ -37,20 +36,20 @@ function CookieDialog({ open, onClose }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">Cookie-Einstellungen</DialogTitle>
+          <DialogTitle className="font-display text-xl">{t('cookies.title')}</DialogTitle>
         </DialogHeader>
         <div className="text-sm space-y-4 text-muted-foreground">
           <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
             <div>
-              <p className="font-semibold text-foreground">Notwendige Cookies</p>
-              <p className="text-xs mt-0.5">Für den Betrieb der Plattform erforderlich. Können nicht deaktiviert werden.</p>
+              <p className="font-semibold text-foreground">{t('cookies.necessary')}</p>
+              <p className="text-xs mt-0.5">{t('cookies.necessaryDesc')}</p>
             </div>
-            <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded shrink-0">Immer aktiv</span>
+            <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded shrink-0">{t('cookies.alwaysActive')}</span>
           </div>
           <div className="flex items-start justify-between gap-4 py-3">
             <div>
-              <p className="font-semibold text-foreground">Analyse-Cookies</p>
-              <p className="text-xs mt-0.5">Helfen uns, die Nutzung der Plattform zu verstehen und zu verbessern.</p>
+              <p className="font-semibold text-foreground">{t('cookies.analytics')}</p>
+              <p className="text-xs mt-0.5">{t('cookies.analyticsDesc')}</p>
             </div>
             <button
               onClick={() => setAnalytics(a => !a)}
@@ -63,7 +62,7 @@ function CookieDialog({ open, onClose }) {
             onClick={save}
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 rounded-md text-sm font-medium"
           >
-            Einstellungen speichern
+            {t('cookies.save')}
           </button>
         </div>
       </DialogContent>
@@ -79,6 +78,7 @@ const FALLBACK_TEXTS = {
 
 export default function Footer() {
   const [openDialog, setOpenDialog] = useState(null);
+  const { t } = useTranslation();
 
   const { data: settings = [] } = useQuery({
     queryKey: ['platform-settings'],
@@ -97,16 +97,16 @@ export default function Footer() {
       <footer className="border-t border-border bg-background mt-auto py-4 px-6">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} cocon coloré</span>
-          <button onClick={() => setOpenDialog('impressum')} className="hover:text-foreground transition-colors underline underline-offset-2">Impressum</button>
-          <button onClick={() => setOpenDialog('agb')} className="hover:text-foreground transition-colors underline underline-offset-2">AGB</button>
-          <button onClick={() => setOpenDialog('datenschutz')} className="hover:text-foreground transition-colors underline underline-offset-2">Datenschutz</button>
-          <button onClick={() => setOpenDialog('cookies')} className="hover:text-foreground transition-colors underline underline-offset-2">Cookie-Einstellungen</button>
+          <button onClick={() => setOpenDialog('impressum')} className="hover:text-foreground transition-colors underline underline-offset-2">{t('footer.impressum')}</button>
+          <button onClick={() => setOpenDialog('agb')} className="hover:text-foreground transition-colors underline underline-offset-2">{t('footer.agb')}</button>
+          <button onClick={() => setOpenDialog('datenschutz')} className="hover:text-foreground transition-colors underline underline-offset-2">{t('footer.datenschutz')}</button>
+          <button onClick={() => setOpenDialog('cookies')} className="hover:text-foreground transition-colors underline underline-offset-2">{t('footer.cookies')}</button>
         </div>
       </footer>
 
-      <LegalDialog open={openDialog === 'impressum'} onClose={() => setOpenDialog(null)} title="Impressum" text={texts.impressum} />
-      <LegalDialog open={openDialog === 'agb'} onClose={() => setOpenDialog(null)} title="Allgemeine Geschäftsbedingungen" text={texts.agb} />
-      <LegalDialog open={openDialog === 'datenschutz'} onClose={() => setOpenDialog(null)} title="Datenschutzerklärung" text={texts.datenschutz} />
+      <LegalDialog open={openDialog === 'impressum'} onClose={() => setOpenDialog(null)} title={t('footer.impressum')} text={texts.impressum} />
+      <LegalDialog open={openDialog === 'agb'} onClose={() => setOpenDialog(null)} title={t('footer.agbFull')} text={texts.agb} />
+      <LegalDialog open={openDialog === 'datenschutz'} onClose={() => setOpenDialog(null)} title={t('footer.datenschutzFull')} text={texts.datenschutz} />
       <CookieDialog open={openDialog === 'cookies'} onClose={() => setOpenDialog(null)} />
     </>
   );

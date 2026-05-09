@@ -12,11 +12,13 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import RoomDialog from '@/components/rooms/RoomDialog';
+import { useTranslation } from 'react-i18next';
 
 export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
   const isEdit = !!slot;
   const defaultDateStr = defaultDate ? format(defaultDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
   const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     title: slot?.title || '',
@@ -44,7 +46,7 @@ export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
       return api.entities.CalendarSlot.create(data);
     },
     onSuccess: () => {
-      toast.success(isEdit ? 'Slot aktualisiert!' : 'Slot erstellt!');
+      toast.success(isEdit ? t('slotDialog.savedSuccess') : t('slotDialog.createdSuccess'));
       onSave();
     },
   });
@@ -52,7 +54,7 @@ export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
   const deleteMutation = useMutation({
     mutationFn: () => api.entities.CalendarSlot.delete(slot.id),
     onSuccess: () => {
-      toast.success('Slot gelöscht.');
+      toast.success(t('slotDialog.deletedSuccess'));
       onSave();
     },
   });
@@ -66,25 +68,25 @@ export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display">{isEdit ? 'Slot bearbeiten' : 'Neuen Slot erstellen'}</DialogTitle>
+          <DialogTitle className="font-display">{isEdit ? t('slotDialog.titleEdit') : t('slotDialog.titleCreate')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Titel *</Label>
+            <Label>{t('slotDialog.titleLabel')} *</Label>
             <Input value={form.title} onChange={e => update('title', e.target.value)} placeholder="z.B. Atelierzeit Block A" required />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Start</Label>
+              <Label>{t('slotDialog.start')}</Label>
               <Input type="datetime-local" value={form.start_datetime} onChange={e => update('start_datetime', e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label>Ende</Label>
+              <Label>{t('slotDialog.end')}</Label>
               <Input type="datetime-local" value={form.end_datetime} onChange={e => update('end_datetime', e.target.value)} required />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Raum</Label>
+            <Label>{t('slotDialog.room')}</Label>
             {rooms.length === 0 ? (
               <button
                 type="button"
@@ -93,16 +95,16 @@ export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
               >
                 <DoorOpen className="w-5 h-5 text-amber-600 shrink-0" />
                 <div className="flex-1 text-sm text-amber-800">
-                  Noch keine Räume angelegt. <span className="underline font-medium">Jetzt Raum erstellen →</span>
+                  {t('slotDialog.noRooms')} <span className="underline font-medium">{t('slotDialog.createRoom')}</span>
                 </div>
               </button>
             ) : (
               <Select value={form.room_id || 'none'} onValueChange={v => update('room_id', v === 'none' ? '' : v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Raum auswählen" />
+                  <SelectValue placeholder={t('slotDialog.selectRoom')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— Kein Raum —</SelectItem>
+                  <SelectItem value="none">{t('slotDialog.noRoom')}</SelectItem>
                   {bookableRooms.map(r => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.name}{r.capacity ? ` (${r.capacity} Pers.)` : ''}
@@ -120,39 +122,39 @@ export default function SlotEditDialog({ slot, defaultDate, onClose, onSave }) {
           )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>{t('slotDialog.status')}</Label>
               <Select value={form.status} onValueChange={v => update('status', v)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="frei">Frei</SelectItem>
-                  <SelectItem value="gebucht">Gebucht</SelectItem>
-                  <SelectItem value="gesperrt">Gesperrt</SelectItem>
+                  <SelectItem value="frei">{t('slotDialog.statusFree')}</SelectItem>
+                  <SelectItem value="gebucht">{t('slotDialog.statusBooked')}</SelectItem>
+                  <SelectItem value="gesperrt">{t('slotDialog.statusBlocked')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Max. Buchungen</Label>
+              <Label>{t('slotDialog.maxBookings')}</Label>
               <Input type="number" min="1" value={form.max_bookings} onChange={e => update('max_bookings', parseInt(e.target.value))} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Interne Notiz</Label>
+            <Label>{t('slotDialog.internalNote')}</Label>
             <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} />
           </div>
           <div className="flex justify-between pt-2">
             {isEdit && (
               <Button type="button" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
                 {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />}
-                Löschen
+                {t('common.delete')}
               </Button>
             )}
             <div className="flex gap-2 ml-auto">
-              <Button type="button" variant="outline" onClick={onClose}>Abbrechen</Button>
+              <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
               <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={saveMutation.isPending}>
                 {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {isEdit ? 'Speichern' : 'Erstellen'}
+                {isEdit ? t('common.save') : t('common.create')}
               </Button>
             </div>
           </div>
