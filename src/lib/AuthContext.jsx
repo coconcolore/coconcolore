@@ -75,6 +75,11 @@ export const AuthProvider = ({ children }) => {
           type: 'auth_required',
           message: 'Authentication required'
         });
+      } else if (err?.message === 'Supabase client not configured') {
+        setAuthError({
+          type: 'auth_required',
+          message: err.message
+        });
       } else {
         setAuthError({
           type: 'unknown',
