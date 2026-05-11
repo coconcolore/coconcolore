@@ -2,7 +2,7 @@ import { supabase } from '@/api/client';
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import {
-  LayoutDashboard, BookOpen, Plus, FileText,
+  BookOpen, Plus,
   Menu, X, LogOut, ChevronRight, User, ShieldCheck, Palette, CalendarDays, Trash2 } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,10 +46,8 @@ export default function Layout() {
   const isLocationManager = role === 'location_manager';
 
   const navItems = [
-    { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
     { path: '/kurskatalog', label: t('nav.catalog'), icon: Palette },
     ...(!isLocationManager ? [{ path: '/courses', label: t('nav.myCourses'), icon: BookOpen }] : []),
-    ...(!isLocationManager ? [{ path: '/invoices', label: isArtist ? t('nav.revenue') : t('nav.billing'), icon: FileText }] : []),
     ...((isAdmin || isArtist) ? [{ path: '/profil', label: t('nav.profile'), icon: User }] : []),
     { path: '/kalender', label: t('nav.calendar'), icon: CalendarDays },
     ...((isAdmin || isManager) ? [{ path: '/admin', label: isAdmin ? t('nav.adminPanel') : t('nav.managerPanel'), icon: ShieldCheck }] : [])

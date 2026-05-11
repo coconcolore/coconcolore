@@ -60,12 +60,13 @@ const AuthenticatedApp = () => {
       <Route path="/zugang-wartet" element={<AccessPending />} />
       {/* App with sidebar */}
       <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
+        {/* <Route path="/" element={<Dashboard />} /> */}
+        <Route path="/" element={<Navigate to="/kurskatalog" replace />} />
         <Route path="/kurskatalog" element={<PublicCatalog />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/new" element={<CourseCreate />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
-        <Route path="/invoices" element={<Invoices />} />
+        {/* <Route path="/invoices" element={<Invoices />} /> */}
         <Route path="/profil" element={<ArtistSetup />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/kalender" element={<SharedCalendar />} />

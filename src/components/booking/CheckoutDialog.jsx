@@ -154,13 +154,13 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
             </div>
 
             <div className="border rounded-xl p-4 space-y-2 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>{t('checkout.ticketLine', { count: quantity, price: pricePerTicket.toFixed(2) })}</span>
-                <span>{totalPrice.toFixed(2)} €</span>
+              <div className="flex items-center justify-between gap-3 text-muted-foreground">
+                <span className="min-w-0 truncate">{t('checkout.ticketLine', { count: quantity, price: pricePerTicket.toFixed(2) })}</span>
+                <span className="shrink-0">{totalPrice.toFixed(2)} €</span>
               </div>
-              <div className="flex justify-between font-bold border-t pt-2">
+              <div className="flex items-center justify-between gap-3 font-bold border-t pt-2">
                 <span>{t('checkout.total')}</span>
-                <span className="text-primary text-lg">{totalPrice.toFixed(2)} €</span>
+                <span className="shrink-0 text-primary text-lg">{totalPrice.toFixed(2)} €</span>
               </div>
             </div>
 
