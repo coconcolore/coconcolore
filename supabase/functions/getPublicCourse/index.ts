@@ -43,6 +43,21 @@ Deno.serve(async (req) => {
       artistProfile = profile;
     }
 
+    let room = null;
+    if (course.room_id) {
+      const { data: roomData, error: roomError } = await admin
+        .from('room')
+        .select('*')
+        .eq('id', course.room_id)
+        .maybeSingle();
+
+      if (roomError) {
+        throw roomError;
+      }
+
+      room = roomData;
+    }
+
     const { data: bookings, error: bookingsError } = await admin
       .from('booking')
       .select('*')
@@ -61,7 +76,7 @@ Deno.serve(async (req) => {
       throw settingsError;
     }
 
-    return Response.json({ course, artistProfile, bookings: bookings ?? [], settings: settings ?? [] }, { headers: corsHeaders });
+    return Response.json({ course, artistProfile, room, bookings: bookings ?? [], settings: settings ?? [] }, { headers: corsHeaders });
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 500, headers: corsHeaders });
   }

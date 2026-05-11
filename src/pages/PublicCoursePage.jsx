@@ -116,9 +116,9 @@ export default function PublicCoursePage() {
   const { data: roomData = [] } = useQuery({
     queryKey: ['room', course?.room_id],
     queryFn: () => api.entities.Room.filter({ id: course.room_id }),
-    enabled: !!course?.room_id,
+    enabled: !!course?.room_id && !data?.room,
   });
-  const room = roomData[0] || null;
+  const room = data?.room || roomData[0] || null;
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
