@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Loader2, X, ImagePlus, Lock } from 'lucide-react';
+import { Upload, Loader2, X, ImagePlus, Lock, Calendar, Clock, MapPin, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 
@@ -34,6 +34,7 @@ const emptyForm = {
 export default function KursVorschlagTab({ user, existingProfile, profileComplete }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(emptyForm);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [uploadingIdx, setUploadingIdx] = useState(null);
   const [submitFeedback, setSubmitFeedback] = useState(null);
   const { t, i18n } = useTranslation();
@@ -54,11 +55,32 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
     enabled: !!user?.email,
   });
 
+  const { data: allSlots = [], isLoading: loadingSlots } = useQuery({
+    queryKey: ['calendar-slots-free'],
+    queryFn: () => api.entities.CalendarSlot.list('start_datetime', 500),
+  });
+
+  const now = new Date();
+  const freeSlots = allSlots.filter(
+    s => s.status === 'frei' && new Date(s.start_datetime) >= now
+  );
+
   const submitMutation = useMutation({
-    mutationFn: (data) => api.entities.Course.create(data),
+    mutationFn: async ({ courseData, slotId }) => {
+      const course = await api.entities.Course.create(courseData);
+      await api.entities.CalendarSlot.update(slotId, {
+        status: 'gebucht',
+        booked_by_email: user.email,
+        booked_by_name: existingProfile?.display_name || user.full_name || user.email,
+      });
+      return course;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-suggested-courses', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-slots-free'] });
+      queryClient.invalidateQueries({ queryKey: ['calendar-slots'] });
       setForm(emptyForm);
+      setSelectedSlot(null);
       setSubmitFeedback({ type: 'success', message: t('proposal.successMessage') });
       toast.success(t('proposal.toastSuccess'));
     },
@@ -103,22 +125,29 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitFeedback(null);
+    if (!selectedSlot) return toast.error('Bitte wähle einen Termin aus.');
     if (!form.title.trim()) return toast.error(t('proposal.errorTitle'));
     if (!form.price || parseFloat(form.price) <= 0) return toast.error(t('proposal.errorPrice'));
     if (form.images.length < 1) return toast.error(t('proposal.errorImage'));
     if (form.images.some(u => u.startsWith('blob:'))) return toast.error('Bitte warte bis alle Bilder hochgeladen sind.');
 
     submitMutation.mutate({
-      title: form.title.trim(),
-      description: form.description.trim(),
-      price: parseFloat(form.price),
-      min_participants: form.min_participants ? parseInt(form.min_participants) : undefined,
-      max_participants: form.max_participants ? parseInt(form.max_participants) : undefined,
-      image_url: form.images[0],
-      image_urls: form.images,
-      artist_email: user.email,
-      artist_name: existingProfile?.display_name || user.full_name || user.email,
-      status: 'ausstehend_freigabe',
+      courseData: {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        price: parseFloat(form.price),
+        min_participants: form.min_participants ? parseInt(form.min_participants) : undefined,
+        max_participants: form.max_participants ? parseInt(form.max_participants) : undefined,
+        image_url: form.images[0],
+        image_urls: form.images,
+        artist_email: user.email,
+        artist_name: existingProfile?.display_name || user.full_name || user.email,
+        status: 'ausstehend_freigabe',
+        event_date: selectedSlot.start_datetime,
+        location: selectedSlot.location || '',
+        room_id: selectedSlot.room_id || null,
+      },
+      slotId: selectedSlot.id,
     });
   };
 
@@ -235,7 +264,56 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
             <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground">💡 {t('proposal.imagesSlotHint')}</div>
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={submitMutation.isPending}>
+          <div className="space-y-3">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              Termin auswählen *
+            </Label>
+            {selectedSlot && (
+              <div className="p-3 bg-primary/5 border border-primary/30 rounded-xl flex items-center gap-2 text-sm text-primary font-medium">
+                <CheckCircle className="w-4 h-4 shrink-0" />
+                {format(parseISO(selectedSlot.start_datetime), 'EEEE, dd.MM.yyyy HH:mm', { locale: dateLocale })}
+              </div>
+            )}
+            {loadingSlots ? (
+              <div className="h-12 bg-muted rounded-xl animate-pulse" />
+            ) : freeSlots.length === 0 ? (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+                Aktuell keine freien Termine verfügbar.
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {freeSlots.map(slot => (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    onClick={() => setSelectedSlot(selectedSlot?.id === slot.id ? null : slot)}
+                    className={`w-full text-left p-3 rounded-xl border transition-all ${
+                      selectedSlot?.id === slot.id
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'border-border hover:border-primary/40 hover:bg-accent/50'
+                    }`}
+                  >
+                    <p className="font-medium text-sm">{slot.title}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {format(parseISO(slot.start_datetime), 'EEE, dd.MM.yyyy HH:mm', { locale: dateLocale })} –{' '}
+                        {format(parseISO(slot.end_datetime), 'HH:mm')}
+                      </span>
+                      {slot.location && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />{slot.location}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={submitMutation.isPending || !selectedSlot || freeSlots.length === 0}>
             {submitMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {submitMutation.isPending ? t('proposal.submitting') : t('proposal.submit')}
           </Button>

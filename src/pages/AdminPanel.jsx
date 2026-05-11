@@ -80,8 +80,8 @@ export default function AdminPanel() {
   const isManager = user?.role === 'kuenstler_manager' || isAdmin;
 
   const approveCourseMutation = useMutation({
-    mutationFn: ({ id }) => api.entities.Course.update(id, { status: 'freigegeben_intern' }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['all-courses'] }); toast.success(t('admin.courses.approvedIntern')); },
+    mutationFn: ({ id }) => api.entities.Course.update(id, { status: 'veroeffentlicht' }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['all-courses'] }); toast.success(t('admin.courses.published')); },
     onError: (error) => { toast.error(error?.message || t('admin.courses.approveError')); },
   });
   const publishCourseMutation = useMutation({
@@ -307,7 +307,7 @@ export default function AdminPanel() {
                     </>
                   )}
                   {course.status === 'freigegeben_intern' && (
-                    <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => publishCourseMutation.mutate({ id: course.id })}>
+                    <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => approveCourseMutation.mutate({ id: course.id })}>
                       <CheckCircle className="w-4 h-4 mr-1" />{t('admin.courses.publish')}
                     </Button>
                   )}
