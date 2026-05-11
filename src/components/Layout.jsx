@@ -1,4 +1,5 @@
 import { supabase } from '@/api/client';
+import sidebarBild from '@/images/Bild.jpg';
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import {
@@ -65,7 +66,7 @@ export default function Layout() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="p-6 border-b border-sidebar-border">
-                <img src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?q=80&w=1200&auto=format&fit=crop" alt="Atelier cocon coloré" className="w-40 object-contain" />
+                <img src={sidebarBild} alt="Atelier cocon coloré" className="w-40 object-contain" />
           <p className="text-xs text-sidebar-foreground/60 mt-1">{user?.full_name || user?.email}</p>
         </div>
 
