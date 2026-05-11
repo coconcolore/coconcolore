@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ const statusColors = {
 
 export default function PublicCoursePage() {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const { t, i18n } = useTranslation();
@@ -72,6 +73,9 @@ export default function PublicCoursePage() {
     queryFn: async () => {
       try {
         const result = await api.functions.invoke('getPublicCourse', { course_id: id });
+        if (result.data?.settings?.length) {
+          queryClient.setQueryData(['platform-settings'], result.data.settings);
+        }
         return result.data;
       } catch {
         const courses = await api.entities.Course.filter({ id });

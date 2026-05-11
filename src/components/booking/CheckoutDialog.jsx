@@ -22,6 +22,11 @@ import { toast } from 'sonner';
 
 const STEPS = ['tickets', 'details', 'confirm'];
 
+const LEGAL_FALLBACK = {
+  agb: `§ 1 Geltungsbereich\nDiese AGB gelten für alle Buchungen und Dienstleistungen über die Plattform cocon coloré.\n\n§ 2 Vertragsschluss\nMit dem Abschluss einer Buchung kommt ein verbindlicher Vertrag zustande.\n\n§ 7 Anwendbares Recht\nEs gilt deutsches Recht. Gerichtsstand ist Berlin.`,
+  datenschutz: `1. Verantwortlicher\ncocon coloré\nInhaberin: Priscilla Haage\nAmsterdamer Straße 6, 13347 Berlin\n\n2. Ihre Rechte\nSie haben das Recht auf Auskunft, Berichtigung und Löschung Ihrer Daten.`,
+};
+
 export default function CheckoutDialog({ course, room, commission, spotsLeft, onClose }) {
   const [step, setStep] = useState('tickets');
   const [loading, setLoading] = useState(false);
@@ -333,7 +338,9 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
             </LegalDialogTitle>
           </LegalDialogHeader>
           <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-            {legalOpen === 'agb' ? (s?.legal_agb || '') : (s?.legal_datenschutz || '')}
+            {legalOpen === 'agb'
+              ? (s?.legal_agb || LEGAL_FALLBACK.agb)
+              : (s?.legal_datenschutz || LEGAL_FALLBACK.datenschutz)}
           </div>
         </LegalDialogContent>
       </LegalDialogRoot>
