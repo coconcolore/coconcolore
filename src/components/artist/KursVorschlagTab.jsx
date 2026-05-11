@@ -76,15 +76,24 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
       return toast.error(t('proposal.errorMaxImages'));
     }
     for (let i = 0; i < files.length; i++) {
-      setUploadingIdx(form.images.length + i);
+      const localUrl = URL.createObjectURL(files[i]);
+      setForm(p => ({ ...p, images: [...p.images, localUrl] }));
+      setUploadingIdx(i);
       try {
         const { file_url } = await api.integrations.Core.UploadFile({ file: files[i] });
-        setForm(p => ({ ...p, images: [...p.images, file_url] }));
+        setForm(p => {
+          const images = [...p.images];
+          const idx = images.indexOf(localUrl);
+          if (idx !== -1) images[idx] = file_url;
+          return { ...p, images };
+        });
       } catch {
         toast.error(`Fehler beim Hochladen von ${files[i].name}`);
+        setForm(p => ({ ...p, images: p.images.filter(u => u !== localUrl) }));
       }
     }
     setUploadingIdx(null);
+    e.target.value = '';
   };
 
   const removeImage = (idx) => {
@@ -97,6 +106,7 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
     if (!form.title.trim()) return toast.error(t('proposal.errorTitle'));
     if (!form.price || parseFloat(form.price) <= 0) return toast.error(t('proposal.errorPrice'));
     if (form.images.length < 1) return toast.error(t('proposal.errorImage'));
+    if (form.images.some(u => u.startsWith('blob:'))) return toast.error('Bitte warte bis alle Bilder hochgeladen sind.');
 
     submitMutation.mutate({
       title: form.title.trim(),
@@ -190,25 +200,28 @@ export default function KursVorschlagTab({ user, existingProfile, profileComplet
           <div className="space-y-3">
             <Label>{t('proposal.images')}</Label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-              {form.images.map((url, idx) => (
-                <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <X className="w-3 h-3 text-white" />
-                  </button>
-                  {idx === 0 && (
-                    <span className="absolute bottom-1 left-1 text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
-                      {t('proposal.imagesMain')}
-                    </span>
-                  )}
-                </div>
-              ))}
-
-              {uploadingIdx !== null && (
-                <div className="aspect-square rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              )}
+              {form.images.map((url, idx) => {
+                const isPending = url.startsWith('blob:');
+                return (
+                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    {isPending ? (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <Loader2 className="w-5 h-5 animate-spin text-white" />
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    )}
+                    {idx === 0 && (
+                      <span className="absolute bottom-1 left-1 text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                        {t('proposal.imagesMain')}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
 
               {form.images.length < 10 && uploadingIdx === null && (
                 <label className="aspect-square rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">

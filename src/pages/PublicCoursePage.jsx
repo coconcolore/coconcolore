@@ -351,6 +351,7 @@ export default function PublicCoursePage() {
                   <Calendar className="w-5 h-5 text-primary mb-1" />
                   <p className="text-xs text-muted-foreground">{t('coursePage.date')}</p>
                   <p className="text-sm font-medium">{format(new Date(course.event_date), 'dd. MMM', { locale: dateLocale })}</p>
+                  <p className="text-xs text-muted-foreground">{format(new Date(course.event_date), 'HH:mm')} Uhr</p>
                 </div>
               )}
               {(room || course.location) && (
