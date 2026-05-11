@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, Link2, Check, AlertCircle } from 'lucide-react';
+import { Clock, Users, Link2, Check, AlertCircle, Calendar, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 
 export default function CourseCard({ course, enrollmentCount = 0, pendingCount = 0, linkTo }) {
   const [copied, setCopied] = useState(false);
@@ -81,6 +83,22 @@ export default function CourseCard({ course, enrollmentCount = 0, pendingCount =
             {course.title}
           </h3>
           <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{course.description}</p>
+          {(course.event_date || course.location) && (
+            <div className="flex flex-col gap-1 mt-3">
+              {course.event_date && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Calendar className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+                  {format(new Date(course.event_date), 'dd. MMM yyyy, HH:mm', { locale: de })} Uhr
+                </span>
+              )}
+              {course.location && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+                  <span className="truncate">{course.location}</span>
+                </span>
+              )}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {course.duration_hours && (
