@@ -24,7 +24,26 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const { t, i18n } = useTranslation();
 
-  const next = searchParams.get('next') || '/';
+  const nextParam = searchParams.get('next');
+  const next = (() => {
+    if (!nextParam) {
+      return '/courses';
+    }
+
+    try {
+      const parsed = new URL(nextParam);
+      const path = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      if (path === '/' || path === '/login') {
+        return '/courses';
+      }
+      return path;
+    } catch {
+      if (nextParam === '/' || nextParam === '/login') {
+        return '/courses';
+      }
+      return nextParam;
+    }
+  })();
 
   useEffect(() => {
     if (!isLoadingAuth && isAuthenticated) {
