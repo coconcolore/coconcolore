@@ -241,3 +241,4 @@ SMOKE_ADMIN_PASSWORD=Admin12345!
 SMOKE_ARTIST_EMAIL=kuenstler@test.local
 SMOKE_ARTIST_PASSWORD=Artist12345!
 ```
+# coconcolore
