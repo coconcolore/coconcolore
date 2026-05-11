@@ -83,8 +83,10 @@ export default function PublicCoursePage() {
           ? await api.entities.ArtistProfile.filter({ user_email: fallbackCourse.artist_email })
           : [];
         let settings = [];
+        let bookings = [];
         try { settings = await api.entities.PlatformSettings.list(); } catch { settings = []; }
-        return { course: fallbackCourse, artistProfile: profiles?.[0] || null, bookings: [], settings: settings || [] };
+        try { bookings = await api.entities.Booking.filter({ course_id: id }); } catch { bookings = []; }
+        return { course: fallbackCourse, artistProfile: profiles?.[0] || null, bookings, settings: settings || [] };
       }
     },
     enabled: !!id,
