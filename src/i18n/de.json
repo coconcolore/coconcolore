@@ -392,6 +392,8 @@
     "participants": "max. {{count}} Teilnehmer"
   },
   "catalog": {
+    "title": "Kurskatalog",
+    "subtitle": "Entdecke alle verfügbaren Kurse",
     "searchPlaceholder": "Kurse suchen...",
     "allCategories": "Alle Kategorien",
     "notFound": "Keine Kurse gefunden"

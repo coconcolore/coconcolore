@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import CourseCard from '@/components/courses/CourseCard';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 
 export default function Courses() {
   const [search, setSearch] = useState('');
@@ -62,8 +64,8 @@ export default function Courses() {
   });
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <motion.div className="space-y-8" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl md:text-4xl font-bold">{t('courses.title')}</h1>
           <p className="text-muted-foreground mt-1">{courses.length} {t('courses.total')}</p>
@@ -83,9 +85,9 @@ export default function Courses() {
             </Button>
           </Link>
         ) : null}
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -125,8 +127,9 @@ export default function Courses() {
             <SelectItem value="sonstiges">{t('courses.category.sonstiges')}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array(6).fill(0).map((_, i) => (
@@ -149,6 +152,7 @@ export default function Courses() {
           ))}
         </div>
       )}
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

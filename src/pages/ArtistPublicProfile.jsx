@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
@@ -42,8 +44,8 @@ export default function ArtistPublicProfile() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-sidebar to-sidebar/80 text-white py-16 px-4">
+    <motion.div className="min-h-screen bg-background" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="bg-gradient-to-br from-sidebar to-sidebar/80 text-white py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-white/10 mx-auto mb-4 ring-4 ring-primary/50">
             {artist.avatar_url ? (
@@ -71,9 +73,9 @@ export default function ArtistPublicProfile() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-8 py-12">
+      <motion.div variants={fadeUp} className="max-w-4xl mx-auto px-4 md:px-8 py-12">
         <div className="flex items-center gap-3 mb-6">
           <BookOpen className="w-5 h-5 text-primary" />
           <h2 className="font-display text-2xl font-semibold">{t('artistProfile.coursesBy', { name: artist.display_name })}</h2>
@@ -88,7 +90,7 @@ export default function ArtistPublicProfile() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

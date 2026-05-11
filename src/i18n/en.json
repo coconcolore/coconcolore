@@ -392,6 +392,8 @@
     "participants": "max. {{count}} participants"
   },
   "catalog": {
+    "title": "Course Catalog",
+    "subtitle": "Discover all available courses",
     "searchPlaceholder": "Search courses...",
     "allCategories": "All categories",
     "notFound": "No courses found"

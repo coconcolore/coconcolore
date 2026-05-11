@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useAuth } from '@/lib/AuthContext';
@@ -68,8 +70,8 @@ export default function SharedCalendar() {
   const selectedDaySlots = selectedDay ? getSlotsForDay(selectedDay) : [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div className="space-y-6" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold">{t('calendar.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('calendar.subtitle')}</p>
@@ -84,9 +86,9 @@ export default function SharedCalendar() {
             </Button>
           </div>
         }
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 p-5">
           <div className="flex items-center justify-between mb-5">
             <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
@@ -221,7 +223,7 @@ export default function SharedCalendar() {
             </div>
           }
         </div>
-      </div>
+      </motion.div>
 
       {(showNewSlot || editSlot) &&
       <SlotEditDialog
@@ -244,5 +246,5 @@ export default function SharedCalendar() {
           setShowDayGenerator(false);
         }} />
       }
-    </div>);
+    </motion.div>);
 }

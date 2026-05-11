@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { Card } from '@/components/ui/card';
@@ -114,39 +116,40 @@ export default function ArtistSetup() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
+    <motion.div className="space-y-6 max-w-2xl" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp}>
         <h1 className="font-display text-3xl font-bold">{t('artist.profileTitle')}</h1>
         <p className="text-muted-foreground mt-1">{t('artist.profileSubtitle')}</p>
-      </div>
+      </motion.div>
 
       {!profileComplete && (
-        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <motion.div variants={fadeUp} className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-amber-800">{t('artist.missingFields')}</p>
             <p className="text-sm text-amber-700 mt-0.5">{t('artist.missingFieldsDesc')} <strong>{missingFields.join(', ')}</strong></p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {existingProfile && !existingProfile.is_approved && profileComplete && (
-        <div className="flex items-center gap-3 p-4 bg-accent rounded-xl border border-primary/20">
+        <motion.div variants={fadeUp} className="flex items-center gap-3 p-4 bg-accent rounded-xl border border-primary/20">
           <Loader2 className="w-5 h-5 text-primary animate-spin" />
           <div>
             <p className="font-medium text-accent-foreground">{t('artist.waitingApproval')}</p>
             <p className="text-sm text-muted-foreground">{t('artist.waitingApprovalDesc')}</p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {existingProfile?.is_approved && (
-        <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
+        <motion.div variants={fadeUp} className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
           <CheckCircle className="w-5 h-5 text-primary" />
           <p className="font-medium">{t('artist.profileApproved')}</p>
-        </div>
+        </motion.div>
       )}
 
+      <motion.div variants={fadeUp}>
       <Tabs defaultValue="profil">
         <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${4 + (showLocationTab ? 1 : 0) + (showStripeTab ? 1 : 0)}, minmax(0, 1fr))` }}>
           <TabsTrigger value="profil"><User className="w-4 h-4 mr-1" />{t('artist.tabs.profile')}</TabsTrigger>
@@ -235,13 +238,14 @@ export default function ArtistSetup() {
           </Card>
         </TabsContent>
       </Tabs>
+      </motion.div>
 
-      <div className="flex justify-end">
+      <motion.div variants={fadeUp} className="flex justify-end">
         <Button onClick={handleSave} className="bg-primary hover:bg-primary/90" disabled={saveMutation.isPending}>
           {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {t('artist.saveProfile')}
         </Button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

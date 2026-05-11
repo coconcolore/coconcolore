@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -215,15 +217,15 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
+    <motion.div className="space-y-8" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp}>
         <h1 className="font-display text-3xl md:text-4xl font-bold">
           {isAdmin ? t('admin.adminTitle') : t('admin.managerTitle')}
         </h1>
         <p className="text-muted-foreground mt-1">{t('admin.subtitle')}</p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
           <p className="text-2xl font-bold font-display text-amber-600">{pendingCourses.length}</p>
           <p className="text-sm text-muted-foreground mt-1">{t('admin.pendingReview')}</p>
@@ -240,8 +242,9 @@ export default function AdminPanel() {
           <p className="text-2xl font-bold font-display text-primary">{bookings.length}</p>
           <p className="text-sm text-muted-foreground mt-1">{t('admin.allBookings')}</p>
         </Card>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       <Tabs defaultValue="kurse">
         <TabsList className={`grid w-full max-w-3xl ${isAdmin ? 'grid-cols-8' : 'grid-cols-6'}`}>
           <TabsTrigger value="kurse" className="flex items-center gap-1">
@@ -583,6 +586,7 @@ export default function AdminPanel() {
           </TabsContent>
         )}
       </Tabs>
+      </motion.div>
 
       {/* Approve Artist Dialog */}
       <Dialog open={!!approveDialog} onOpenChange={(o) => !o && setApproveDialog(null)}>
@@ -793,6 +797,6 @@ export default function AdminPanel() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

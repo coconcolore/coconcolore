@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { Link, useParams } from 'react-router-dom';
@@ -127,8 +129,8 @@ export default function CourseDetail() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <motion.div className="space-y-8" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <Link to="/courses">
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
@@ -193,15 +195,18 @@ export default function CourseDetail() {
             </Button>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {course.status === 'abgelehnt' && course.admin_notes && (
+        <motion.div variants={fadeUp}>
         <Card className="p-4 border border-red-200 bg-red-50">
           <h3 className="font-semibold text-red-800 mb-1">{t('courseDetail.feedbackTitle')}</h3>
           <p className="text-sm text-red-700 whitespace-pre-wrap">{course.admin_notes}</p>
         </Card>
+        </motion.div>
       )}
 
+      <motion.div variants={fadeUp}>
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-xl font-semibold">{t('courseDetail.lessons', { count: lessons.length })}</h2>
@@ -273,6 +278,7 @@ export default function CourseDetail() {
           </div>
         )}
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

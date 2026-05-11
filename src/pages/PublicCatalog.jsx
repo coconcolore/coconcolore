@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 
 export default function PublicCatalog() {
   const [search, setSearch] = useState('');
@@ -25,9 +27,14 @@ export default function PublicCatalog() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div className="min-h-screen bg-background" variants={pageContainer} initial="hidden" animate="show">
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
-        <div className="flex flex-col sm:flex-row gap-3 mb-10">
+        <motion.div variants={fadeUp} className="mb-8">
+          <h1 className="font-display text-3xl md:text-4xl font-bold">{t('catalog.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('catalog.subtitle')}</p>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 mb-10">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('catalog.searchPlaceholder')} className="pl-10" />
@@ -48,8 +55,9 @@ export default function PublicCatalog() {
               <SelectItem value="sonstiges">{t('courses.category.sonstiges')}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </motion.div>
 
+        <motion.div variants={fadeUp}>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-80 rounded-xl" />)}
@@ -61,7 +69,8 @@ export default function PublicCatalog() {
             {filtered.map(course => <CourseCard key={course.id} course={course} linkTo={`/kurs/${course.id}`} />)}
           </div>
         )}
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

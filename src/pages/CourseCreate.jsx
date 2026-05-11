@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { pageContainer, fadeUp } from '@/lib/motion';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
@@ -102,13 +104,14 @@ function ArtistCourseCreate({ user }) {
 
   if (allProposals.length === 0) {
     return (
-      <div className="max-w-2xl space-y-6">
-        <div className="flex items-center gap-4">
+      <motion.div className="max-w-2xl space-y-6" variants={pageContainer} initial="hidden" animate="show">
+        <motion.div variants={fadeUp} className="flex items-center gap-4">
           <Link to="/courses">
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleArtist')}</h1>
-        </div>
+        </motion.div>
+        <motion.div variants={fadeUp}>
         <Card className="p-8 text-center space-y-4">
           <Lightbulb className="w-10 h-10 text-amber-400 mx-auto" />
           <h2 className="font-semibold text-lg">{t('courseCreate.noProposal')}</h2>
@@ -124,13 +127,14 @@ function ArtistCourseCreate({ user }) {
             </Link>
           </div>
         </Card>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex items-center gap-4">
+    <motion.div className="max-w-2xl space-y-6" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="flex items-center gap-4">
         <Link to="/courses">
           <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
@@ -138,8 +142,9 @@ function ArtistCourseCreate({ user }) {
           <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleArtist')}</h1>
           <p className="text-muted-foreground mt-1">{t('courseCreate.subtitleArtist')}</p>
         </div>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       <Card className="p-6 space-y-6">
 
         <div className="space-y-3">
@@ -283,7 +288,8 @@ function ArtistCourseCreate({ user }) {
           </Button>
         </div>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -369,8 +375,8 @@ function ManagerCourseCreate({ user }) {
   const update = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center gap-4">
+    <motion.div className="space-y-6 max-w-2xl" variants={pageContainer} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="flex items-center gap-4">
         <Link to="/courses">
           <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
         </Link>
@@ -378,8 +384,9 @@ function ManagerCourseCreate({ user }) {
           <h1 className="font-display text-3xl font-bold">{t('courseCreate.titleManager')}</h1>
           <p className="text-muted-foreground mt-1">{t('courseCreate.subtitleManager')}</p>
         </div>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -537,7 +544,8 @@ function ManagerCourseCreate({ user }) {
           </div>
         </form>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
