@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { api } from '@/api/client';
+import { api, supabase } from '@/api/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,7 +60,7 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
     try {
       const commissionPercent = s?.commission_percent ?? 15;
       const amountCommission = totalPrice * commissionPercent / 100;
-      await api.entities.Booking.create({
+      const { error: bookingError } = await supabase.from('booking').insert({
         course_id: course.id,
         customer_name: form.customer_name,
         customer_email: form.customer_email,
@@ -70,6 +70,7 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
         amount_commission: amountCommission,
         amount_artist: totalPrice - amountCommission,
       });
+      if (bookingError) throw bookingError;
       setBooked(true);
     } catch {
       toast.error(t('checkout.bookingError'));
