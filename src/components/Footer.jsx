@@ -73,7 +73,7 @@ function CookieDialog({ open, onClose }) {
 const FALLBACK_TEXTS = {
   impressum: `cocon coloré\nInhaberin: Priscilla Sarah Candida Haage\nAmsterdamer Straße 6\n13347 Berlin\n\nTelefon: +49 (0) 176 56844830\nE-Mail: email@coconcolore.de`,
   agb: `§ 1 Geltungsbereich\nDiese AGB gelten für alle Buchungen und Dienstleistungen über die Plattform cocon coloré.\n\n§ 2 Vertragsschluss\nMit dem Abschluss einer Buchung kommt ein verbindlicher Vertrag zustande.\n\n§ 7 Anwendbares Recht\nEs gilt deutsches Recht. Gerichtsstand ist Berlin.`,
-  datenschutz: `1. Verantwortliche\ncocon coloré\nInhaberin: Priscilla Haage\nAmsterdamer Straße 6, 13347 Berlin\nTelefon: +49 (0) 176 56 84 48 30\n\n2. Ihre Rechte\nSie haben das Recht auf Auskunft, Berichtigung und Löschung Ihrer Daten.`,
+  datenschutz: `1. Verantwortlicher\ncocon coloré\nInhaberin: Priscilla Haage\nAmsterdamer Straße 6, 13347 Berlin\nTelefon: +49 (0) 176 56 84 48 30\n\n2. Ihre Rechte\nSie haben das Recht auf Auskunft, Berichtigung und Löschung Ihrer Daten.`,
 };
 
 export default function Footer() {
