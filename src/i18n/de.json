@@ -41,7 +41,7 @@
     "deleteAccountConfirm": "Ja, Konto löschen"
   },
   "login": {
-    "signinTitle": "Sign in",
+    "signinTitle": "Anmelden",
     "registerTitle": "Registrieren",
     "signinDesc": "Melde dich mit deinem Account an.",
     "registerDesc": "Erstelle einen neuen Benutzeraccount.",

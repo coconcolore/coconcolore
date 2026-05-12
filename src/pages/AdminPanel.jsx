@@ -505,7 +505,11 @@ export default function AdminPanel() {
             {artistProfiles.length === 0 ? (
               <p className="text-muted-foreground py-8 text-center">{t('admin.artists.noProfiles')}</p>
             ) : artistProfiles.map(ap => (
-              <Card key={ap.id} className="p-4">
+              <Card
+                key={ap.id}
+                className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => openApproveDialog(ap)}
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     {ap.avatar_url ? (
@@ -524,10 +528,9 @@ export default function AdminPanel() {
                     {ap.is_approved ? (
                       <Badge className="bg-primary/10 text-primary">{t('admin.artists.approved')}</Badge>
                     ) : (
-                      <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => openApproveDialog(ap)}>
-                        <CheckCircle className="w-4 h-4 mr-1" />{t('admin.artists.approve')}
-                      </Button>
+                      <Badge className="bg-amber-100 text-amber-700">{t('admin.artists.waiting')}</Badge>
                     )}
+                    <Eye className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
               </Card>
@@ -674,29 +677,35 @@ export default function AdminPanel() {
                   </Section>
                 )}
 
-                <hr className="border-border" />
+                {!ap.is_approved && (
+                  <>
+                    <hr className="border-border" />
 
-                <div className="space-y-2">
-                  <Label>{t('admin.artists.assignRoleLabel')}</Label>
-                  <Select value={approveRole} onValueChange={setApproveRole}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">{t('admin.roles.user')}</SelectItem>
-                      <SelectItem value="kuenstler">{t('admin.roles.kuenstler')}</SelectItem>
-                      {isAdmin && <SelectItem value="kuenstler_manager">{t('admin.roles.kuenstler_manager')}</SelectItem>}
-                      {isAdmin && <SelectItem value="location_manager">{t('admin.roles.location_manager')}</SelectItem>}
-                      {isAdmin && <SelectItem value="admin">{t('admin.roles.admin')}</SelectItem>}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">{t('admin.artists.roleHint')}</p>
-                </div>
+                    <div className="space-y-2">
+                      <Label>{t('admin.artists.assignRoleLabel')}</Label>
+                      <Select value={approveRole} onValueChange={setApproveRole}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">{t('admin.roles.user')}</SelectItem>
+                          <SelectItem value="kuenstler">{t('admin.roles.kuenstler')}</SelectItem>
+                          {isAdmin && <SelectItem value="kuenstler_manager">{t('admin.roles.kuenstler_manager')}</SelectItem>}
+                          {isAdmin && <SelectItem value="location_manager">{t('admin.roles.location_manager')}</SelectItem>}
+                          {isAdmin && <SelectItem value="admin">{t('admin.roles.admin')}</SelectItem>}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">{t('admin.artists.roleHint')}</p>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex justify-end gap-3 pt-2">
                   <Button variant="outline" onClick={() => setApproveDialog(null)}>{t('common.cancel')}</Button>
-                  <Button className="bg-primary hover:bg-primary/90" disabled={approveArtistMutation.isPending}
-                    onClick={() => approveArtistMutation.mutate({ profileId: ap.id, userId: approveDialog.userRecord?.id, userEmail: ap.user_email, role: approveRole })}>
-                    <CheckCircle className="w-4 h-4 mr-1" />{t('admin.artists.approveAndSet')}
-                  </Button>
+                  {!ap.is_approved && (
+                    <Button className="bg-primary hover:bg-primary/90" disabled={approveArtistMutation.isPending}
+                      onClick={() => approveArtistMutation.mutate({ profileId: ap.id, userId: approveDialog.userRecord?.id, userEmail: ap.user_email, role: approveRole })}>
+                      <CheckCircle className="w-4 h-4 mr-1" />{t('admin.artists.approveAndSet')}
+                    </Button>
+                  )}
                 </div>
               </div>
             );

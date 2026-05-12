@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import {
   Clock, Users, Calendar, MapPin, CheckCircle,
-  ArrowLeft, CreditCard, Eye, Building2, ChevronLeft, ChevronRight, X, Grid2x2
+  ArrowLeft, CreditCard, Eye, Building2, ChevronLeft, ChevronRight, X, Grid2x2,
+  Instagram, Globe
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
@@ -427,6 +428,32 @@ export default function PublicCoursePage() {
                       {artistProfile.bio && (
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{artistProfile.bio}</p>
                       )}
+                      {(artistProfile.instagram || artistProfile.website) && (
+                        <div className="flex flex-wrap gap-3 mt-2">
+                          {artistProfile.instagram && (
+                            <a
+                              href={`https://instagram.com/${artistProfile.instagram.replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                            >
+                              <Instagram className="w-4 h-4" />
+                              {artistProfile.instagram}
+                            </a>
+                          )}
+                          {artistProfile.website && (
+                            <a
+                              href={artistProfile.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                            >
+                              <Globe className="w-4 h-4" />
+                              {artistProfile.website.replace(/^https?:\/\//, '')}
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -473,7 +500,6 @@ export default function PublicCoursePage() {
 
                 <ul className="mt-5 space-y-2">
                   {[
-                    t('coursePage.confirmationEmail'),
                     t('coursePage.personalSupport'),
                     course.max_participants ? t('coursePage.maxParticipants', { count: course.max_participants }) : null,
                   ].filter(Boolean).map((text, i) => (
