@@ -21,6 +21,7 @@ jobs:
   build-project:
     name: build coconcolore
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: checkout
         uses: actions/checkout@v4
