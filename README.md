@@ -1,4 +1,4 @@
-# Ethereal Art Flow Pro
+# cocon colore
 
 Dieses Projekt wurde auf Supabase migriert.
 
