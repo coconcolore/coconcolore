@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { pageContainer, fadeUp } from '@/lib/motion';
 
+import Footer from '@/components/Footer';
+
 export default function PublicCatalog() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -27,8 +29,8 @@ export default function PublicCatalog() {
   });
 
   return (
-    <motion.div className="min-h-screen bg-background" variants={pageContainer} initial="hidden" animate="show">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+    <motion.div className="min-h-screen bg-background flex flex-col" variants={pageContainer} initial="hidden" animate="show">
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-12">
         <motion.div variants={fadeUp} className="mb-8">
           <h1 className="font-display text-3xl md:text-4xl font-bold">{t('catalog.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('catalog.subtitle')}</p>
@@ -71,6 +73,7 @@ export default function PublicCatalog() {
         )}
         </motion.div>
       </div>
+      <Footer />
     </motion.div>
   );
 }

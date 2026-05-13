@@ -31,6 +31,10 @@
     "legal_datenschutz": {
       "type": "string",
       "description": "Datenschutzerkl\u00e4rung Text"
+    },
+    "payment_link": {
+      "type": "string",
+      "description": "Externer Zahlungslink (z.B. PayPal, Stripe, etc.)"
     }
   },
   "required": []

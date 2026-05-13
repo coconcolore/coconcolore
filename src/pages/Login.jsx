@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
+import Footer from '@/components/Footer';
+
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -113,7 +115,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
         <div className="flex justify-end">
           <div className="flex items-center gap-1">
@@ -225,6 +228,8 @@ export default function Login() {
           .
         </p>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }

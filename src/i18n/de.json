@@ -184,7 +184,8 @@
       "users": "User",
       "iban": "IBAN Atelier",
       "legal": "Rechtstexte",
-      "settings": "Settings"
+      "settings": "Settings",
+      "paymentLink": "Zahlungslink"
     },
     "courses": {
       "title": "Alle Kurse",
@@ -463,7 +464,14 @@
     "ibanCopied": "IBAN kopiert!",
     "bookingError": "Fehler beim Erstellen der Buchung. Bitte erneut versuchen.",
     "agbTitle": "Allgemeine Geschäftsbedingungen",
-    "datenschutzTitle": "Datenschutzerklärung"
+    "datenschutzTitle": "Datenschutzerklärung",
+    "paymentMethod": "Zahlungsart wählen",
+    "payByTransfer": "Überweisung",
+    "payByTransferHint": "Banküberweisung nach der Buchung",
+    "payByLink": "Zahlungslink",
+    "payByLinkHint": "Direkt online bezahlen",
+    "payByLinkSuccess": "Bitte schließe die Zahlung über den folgenden Link ab:",
+    "openPaymentLink": "Jetzt bezahlen"
   },
   "calendar": {
     "title": "Shared Kalender",
@@ -736,5 +744,12 @@
     "item1": "Prüfen, ob du mit dem richtigen Konto eingeloggt bist",
     "item2": "Den Administrator um Zugang bitten",
     "item3": "Dich ab- und wieder anmelden"
+  },
+  "paymentLinkPanel": {
+    "title": "Zahlungslink",
+    "hint": "Hinterlege hier einen externen Zahlungslink (z.B. PayPal, Stripe, Sumup). Kunden können diesen beim Checkout als Alternative zur Überweisung nutzen.",
+    "linkLabel": "Zahlungslink URL",
+    "linkHint": "z.B. https://paypal.me/deinname oder https://buy.stripe.com/...",
+    "saveSuccess": "Zahlungslink gespeichert!"
   }
 }

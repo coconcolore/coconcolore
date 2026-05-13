@@ -153,6 +153,7 @@ const ensureDomainRows = async ({ authUser, role, full_name, email }) => {
     }
 
     // Clear child tables before parent tables to avoid FK violations.
+    // platform_settings is intentionally excluded to preserve Rechtstexte.
     const clearOrder = [
       'enrollment',
       'invoice',
@@ -161,9 +162,8 @@ const ensureDomainRows = async ({ authUser, role, full_name, email }) => {
       'course',
       'calendar_slot',
       'payout_request',
-      'room',
+      //'room',
       'artist_profile',
-      'platform_settings',
       'users'
     ];
 

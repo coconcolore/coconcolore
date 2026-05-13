@@ -184,7 +184,8 @@
       "users": "Users",
       "iban": "IBAN Atelier",
       "legal": "Legal texts",
-      "settings": "Settings"
+      "settings": "Settings",
+      "paymentLink": "Payment link"
     },
     "courses": {
       "title": "All Courses",
@@ -463,7 +464,14 @@
     "ibanCopied": "IBAN copied!",
     "bookingError": "Error creating booking. Please try again.",
     "agbTitle": "Terms & Conditions",
-    "datenschutzTitle": "Privacy Policy"
+    "datenschutzTitle": "Privacy Policy",
+    "paymentMethod": "Choose payment method",
+    "payByTransfer": "Bank transfer",
+    "payByTransferHint": "Pay by bank transfer after booking",
+    "payByLink": "Payment link",
+    "payByLinkHint": "Pay online directly",
+    "payByLinkSuccess": "Please complete your payment via the link below:",
+    "openPaymentLink": "Pay now"
   },
   "calendar": {
     "title": "Shared Calendar",
@@ -736,5 +744,12 @@
     "item1": "Verify you are logged in with the correct account",
     "item2": "Contact the app administrator for access",
     "item3": "Try logging out and back in again"
+  },
+  "paymentLinkPanel": {
+    "title": "Payment Link",
+    "hint": "Enter an external payment link here (e.g. PayPal, Stripe, SumUp). Customers can use this as an alternative to bank transfer at checkout.",
+    "linkLabel": "Payment link URL",
+    "linkHint": "e.g. https://paypal.me/yourname or https://buy.stripe.com/...",
+    "saveSuccess": "Payment link saved!"
   }
 }

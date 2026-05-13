@@ -12,10 +12,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle, XCircle, Users, BookOpen, Settings, ShieldCheck, Eye, Trash2, Pencil, Banknote, CreditCard, ShoppingCart, FileText, Globe, AtSign, Phone, MapPin, ImagePlus, Loader2, X, Star } from 'lucide-react';
+import { CheckCircle, XCircle, Users, BookOpen, Settings, ShieldCheck, Eye, Trash2, Pencil, Banknote, CreditCard, ShoppingCart, FileText, Globe, AtSign, Phone, MapPin, ImagePlus, Loader2, X, Star, Link2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import IbanSettingsPanel from '@/components/admin/IbanSettingsPanel';
+import PaymentLinkPanel from '@/components/admin/PaymentLinkPanel';
 import LegalTextsTab from '@/components/admin/LegalTextsTab';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -264,6 +265,7 @@ export default function AdminPanel() {
           </TabsTrigger>
           {isAdmin && <TabsTrigger value="users"><Users className="w-4 h-4 mr-1" />{t('admin.tabs.users')}</TabsTrigger>}
           <TabsTrigger value="iban"><Banknote className="w-4 h-4 mr-1" />{t('admin.tabs.iban')}</TabsTrigger>
+          <TabsTrigger value="zahlungslink"><Link2 className="w-4 h-4 mr-1" />{t('admin.tabs.paymentLink')}</TabsTrigger>
           {isManager && <TabsTrigger value="rechtstexte"><FileText className="w-4 h-4 mr-1" />{t('admin.tabs.legal')}</TabsTrigger>}
           {isAdmin && <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" />{t('admin.tabs.settings')}</TabsTrigger>}
         </TabsList>
@@ -571,6 +573,7 @@ export default function AdminPanel() {
         )}
 
         <TabsContent value="iban" className="mt-6"><IbanSettingsPanel /></TabsContent>
+        <TabsContent value="zahlungslink" className="mt-6"><PaymentLinkPanel /></TabsContent>
         {isManager && <TabsContent value="rechtstexte" className="mt-6"><LegalTextsTab /></TabsContent>}
 
         {isAdmin && (

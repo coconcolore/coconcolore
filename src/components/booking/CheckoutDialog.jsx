@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Loader2, Minus, Plus, Banknote, CheckCircle,
-  Calendar, MapPin, Clock, Mail, User, ChevronRight, Copy
+  Calendar, MapPin, Clock, Mail, User, ChevronRight, Copy, Link2, ExternalLink
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
@@ -34,6 +34,7 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
   const [quantity, setQuantity] = useState(1);
   const [agbAccepted, setAgbAccepted] = useState(false);
   const [legalOpen, setLegalOpen] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('transfer');
   const [form, setForm] = useState({
     customer_name: '',
     customer_email: '',
@@ -76,6 +77,10 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
         amount_artist: totalPrice - amountCommission,
       });
       if (bookingError) throw bookingError;
+      if (paymentMethod === 'link' && s?.payment_link) {
+        const url = s.payment_link.match(/^https?:\/\//) ? s.payment_link : `https://${s.payment_link}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
       setBooked(true);
     } catch {
       toast.error(t('checkout.bookingError'));
@@ -236,9 +241,34 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
-              <Banknote className="w-4 h-4 shrink-0" />
-              {t('checkout.transferHint')}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">{t('checkout.paymentMethod')}</Label>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('transfer')}
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${paymentMethod === 'transfer' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+                >
+                  <Banknote className={`w-5 h-5 shrink-0 ${paymentMethod === 'transfer' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <div>
+                    <p className={`text-sm font-medium ${paymentMethod === 'transfer' ? 'text-primary' : ''}`}>{t('checkout.payByTransfer')}</p>
+                    <p className="text-xs text-muted-foreground">{t('checkout.payByTransferHint')}</p>
+                  </div>
+                </button>
+                {s?.payment_link && (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('link')}
+                    className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${paymentMethod === 'link' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+                  >
+                    <Link2 className={`w-5 h-5 shrink-0 ${paymentMethod === 'link' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <div>
+                      <p className={`text-sm font-medium ${paymentMethod === 'link' ? 'text-primary' : ''}`}>{t('checkout.payByLink')}</p>
+                      <p className="text-xs text-muted-foreground">{t('checkout.payByLinkHint')}</p>
+                    </div>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex items-start gap-3 p-3 border border-border rounded-lg">
@@ -260,7 +290,7 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setStep('details')} className="flex-1" disabled={loading}>{t('common.back')}</Button>
               <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={handleBooking} disabled={loading || !agbAccepted}>
-                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Banknote className="w-4 h-4 mr-2" />}
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : paymentMethod === 'link' ? <Link2 className="w-4 h-4 mr-2" /> : <Banknote className="w-4 h-4 mr-2" />}
                 {t('checkout.bookNow')}
               </Button>
             </div>
@@ -277,44 +307,59 @@ export default function CheckoutDialog({ course, room, commission, spotsLeft, on
               </div>
             </div>
 
-            {(s?.platform_iban || s?.platform_iban_owner) && (
-              <div className="border rounded-xl divide-y text-sm">
-                {s?.platform_iban_owner && (
-                  <div className="p-3 flex justify-between">
-                    <span className="text-muted-foreground">{t('checkout.transferOwner')}</span>
-                    <span className="font-medium">{s.platform_iban_owner}</span>
-                  </div>
-                )}
-                {s?.platform_bank && (
-                  <div className="p-3 flex justify-between">
-                    <span className="text-muted-foreground">{t('checkout.transferBank')}</span>
-                    <span className="font-medium">{s.platform_bank}</span>
-                  </div>
-                )}
-                {s?.platform_iban && (
-                  <div className="p-3 flex justify-between items-center gap-2">
-                    <span className="text-muted-foreground">IBAN</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-semibold">{s.platform_iban}</span>
-                      <button
-                        type="button"
-                        onClick={() => { navigator.clipboard.writeText(s.platform_iban); toast.success(t('checkout.ibanCopied')); }}
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <div className="p-3 flex justify-between">
-                  <span className="text-muted-foreground">{t('checkout.total')}</span>
-                  <span className="font-bold text-primary">{totalPrice.toFixed(2)} €</span>
-                </div>
-                <div className="p-3 flex justify-between">
-                  <span className="text-muted-foreground">{t('checkout.transferRef')}</span>
-                  <span className="font-medium text-right max-w-[55%] truncate">{form.customer_name} – {course.title}</span>
-                </div>
+            {paymentMethod === 'link' && s?.payment_link ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">{t('checkout.payByLinkSuccess')}</p>
+                <a
+                  href={s.payment_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary/90 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {t('checkout.openPaymentLink')}
+                </a>
               </div>
+            ) : (
+              (s?.platform_iban || s?.platform_iban_owner) && (
+                <div className="border rounded-xl divide-y text-sm">
+                  {s?.platform_iban_owner && (
+                    <div className="p-3 flex justify-between">
+                      <span className="text-muted-foreground">{t('checkout.transferOwner')}</span>
+                      <span className="font-medium">{s.platform_iban_owner}</span>
+                    </div>
+                  )}
+                  {s?.platform_bank && (
+                    <div className="p-3 flex justify-between">
+                      <span className="text-muted-foreground">{t('checkout.transferBank')}</span>
+                      <span className="font-medium">{s.platform_bank}</span>
+                    </div>
+                  )}
+                  {s?.platform_iban && (
+                    <div className="p-3 flex justify-between items-center gap-2">
+                      <span className="text-muted-foreground">IBAN</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-semibold">{s.platform_iban}</span>
+                        <button
+                          type="button"
+                          onClick={() => { navigator.clipboard.writeText(s.platform_iban); toast.success(t('checkout.ibanCopied')); }}
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-3 flex justify-between">
+                    <span className="text-muted-foreground">{t('checkout.total')}</span>
+                    <span className="font-bold text-primary">{totalPrice.toFixed(2)} €</span>
+                  </div>
+                  <div className="p-3 flex justify-between">
+                    <span className="text-muted-foreground">{t('checkout.transferRef')}</span>
+                    <span className="font-medium text-right max-w-[55%] truncate">{form.customer_name} – {course.title}</span>
+                  </div>
+                </div>
+              )
             )}
 
             <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
